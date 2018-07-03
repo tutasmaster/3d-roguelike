@@ -35,6 +35,8 @@ public:
 	bool isTilePosValid(const Pos p);
 	bool isTilePosValid(const int w, const int h, const int d);
 
+	void GenerateTerrain(int type);
+
 	TileID * arr;
 
 	int width, height, depth;

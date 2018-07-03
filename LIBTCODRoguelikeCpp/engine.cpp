@@ -1,25 +1,33 @@
 #include "engine.hpp"
 
-Engine::Engine() : map(64,64,64)
+Engine::Engine() : map(128,128,64)
 {
+	map.GenerateTerrain(0);
 
-	TCODConsole::initRoot(64, 80, "Roguelike");
+	TCODConsole::initRoot(128, 80, "Roguelike");
 
 	player->ai = std::make_shared<PlayerAi>();
 
-	SetMapLayer(map, 0, TileManager::floor);
+	for (int i = 0; i < map.depth; i++) {
+		if (map.GetTileAt(0, 0, i)->type != TileManager::wall) {
+			player->pos.d = i;
+			break;
+		}
+	}
 
-	std::shared_ptr<Entity> npc = std::make_shared<Entity>();
+
+	/*std::shared_ptr<Entity> npc = std::make_shared<Entity>();
 	npc->pos.w = 10;
 	npc->pos.h = 10;
 	npc->ai = std::make_shared<FriendlyAi>();
-	npcs.push_back(npc);
+	npcs.push_back(npc);*/
 
 	Message msg;
 	msg.msg = "Player has entered the world!";
 	msg.col = TCODColor::yellow;
 
 	console.push_back(msg);
+
 }
 
 
@@ -71,12 +79,12 @@ void Engine::render()
 
 						TCODColor col = t->color;
 						float a = col.getValue();
-						col.setValue((a/(temp+1 + (3 - ((t->shadeLimit) / 2)))) - (isHidden * 20));
+						col.setValue((a/(temp+1 + (3 - ((t->shadeLimit) / 10)))) - (isHidden * 20));
 
 
 						TCODColor bg = t->bg;
 						float b = bg.getValue();
-						bg .setValue((b/(temp+1 + (3 - ((t->shadeLimit) / 2)))) - (isHidden*20));
+						bg .setValue((b/(temp+1 + (3 - ((t->shadeLimit) / 10)))) - (isHidden*20));
 
 						
 
@@ -88,7 +96,7 @@ void Engine::render()
 
 					g++;
 
-					if (g > 5)
+					if (g > 20)
 						break;
 				}
 			}

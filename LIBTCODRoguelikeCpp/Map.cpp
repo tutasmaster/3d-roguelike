@@ -1,5 +1,6 @@
 #include "Map.h"
 
+#include "MapGenerators.h"
 
 Map::Map(int w = 255, int h = 255, int d = 255) : width(w) , height(h) , depth(d)
 {
@@ -108,3 +109,39 @@ void DrawSquareOnMap(Map& m, int x, int y, int w, int h, int d, TileID tile) {
 		}
 	}
 }
+
+void Map::GenerateTerrain(int type) {
+	switch (type) {
+	case 0:
+		GeneratePerlinNoiseMap(this);
+		break;
+	case 1:
+		GeneratePerlinFBMNoiseMap(this);
+		break;
+	case 2:
+		GeneratePerlinTurbulenceNoiseMap(this);
+		break;
+	case 3:
+		GeneratePerlinRigidNoiseMap(this);
+		break;
+	case 4:
+		GenerateSimplexNoiseMap(this);
+		break;
+	case 5:
+		GenerateSimplexFBMNoiseMap(this);
+		break;
+	case 6:
+		GenerateSimplexTurbulenceNoiseMap(this);
+		break;
+	case 7:
+		GenerateWaveletNoiseMap(this);
+		break;
+	case 8:
+		GenerateWaveletFBMNoiseMap(this);
+		break;
+	case 9:
+		GenerateWaveletTurbulenceNoiseMap(this);
+		break;
+	}
+}
+

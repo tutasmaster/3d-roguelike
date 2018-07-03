@@ -165,6 +165,7 @@
     <ClInclude Include="Entity.h" />
     <ClInclude Include="Error.h" />
     <ClInclude Include="Map.h" />
+    <ClInclude Include="MapGenerators.h" />
     <ClInclude Include="TileManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

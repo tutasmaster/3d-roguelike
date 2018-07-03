@@ -14,7 +14,7 @@ public:
 	TCODColor bg = TCODColor::black;
 	TCODColor color = TCODColor::white;
 
-	int shadeLimit = 5;
+	int shadeLimit = 20;
 
 	char c = '.';
 
