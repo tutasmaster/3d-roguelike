@@ -36,6 +36,13 @@ public:
 	void init();
 	void render();
 	void update();
+
+
+	void renderMap();
+	void renderMapStandard();
+
+	int layerSize = 20;
+	bool betterRenderer = false;
 };
 
 extern Engine engine;

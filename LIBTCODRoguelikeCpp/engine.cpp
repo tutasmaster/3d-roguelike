@@ -1,10 +1,10 @@
 #include "engine.hpp"
 
-Engine::Engine() : map(128,128,64)
+Engine::Engine() : map(64,64,64)
 {
 	map.GenerateTerrain(0);
 
-	TCODConsole::initRoot(128, 80, "Roguelike");
+	TCODConsole::initRoot(64, 80, "Roguelike");
 
 	player->ai = std::make_shared<PlayerAi>();
 
@@ -52,58 +52,10 @@ void Engine::render()
 {
 	TCODConsole::root->clear();
 
-
-	for (int j = 0; j < map.height; j++) {
-		for (int i = 0; i < map.width; i++) {
-			Tile* r = map.GetTileAt(i,j,player->pos.d);
-
-			if(r != nullptr && r->type != r->empty){
-				TCODConsole::root->setCharBackground(i, j, r->bg);
-				TCODConsole::root->setCharForeground(i,j,r->color);
-				TCODConsole::root->setChar(i, j, r->c);
-			}
-			else if(r != nullptr){
-				int g = 0;
-				for (int z = player->pos.d; z > -1; --z) {
-					Tile * t = map.GetTileAt(i - g, j - g, z);
-					int temp = g;
-					bool isHidden = false;
-					if (g != 0 && map.GetTileAt((i - g) + 1, (j - g) + 1, z) != nullptr && map.GetTileAt((i - g) + 1, (j - g) + 1, z)->type == Tile::wall && map.GetTileAt((i - g) + 1, (j - g) + 1, z)->isBlocking){
-						t = map.GetTileAt((i - g) + 1, (j - g) + 1, z);
-						temp--;
-						isHidden = true;
-					}
-					if (t != nullptr && t->type != Tile::empty) {
-						if (t->shadeLimit < g)
-							break;
-
-						TCODColor col = t->color;
-						float a = col.getValue();
-						col.setValue((a/(temp+1 + (3 - ((t->shadeLimit) / 10)))) - (isHidden * 20));
-
-
-						TCODColor bg = t->bg;
-						float b = bg.getValue();
-						bg .setValue((b/(temp+1 + (3 - ((t->shadeLimit) / 10)))) - (isHidden*20));
-
-						
-
-						TCODConsole::root->setCharForeground(i, j, col);
-						TCODConsole::root->setCharBackground(i, j, bg);
-						TCODConsole::root->setChar(i, j, t->c);
-						break;
-					}
-
-					g++;
-
-					if (g > 20)
-						break;
-				}
-			}
-			else {
-				//Err::ConsoleLog("Something awfull happened while drawing the map... run!");
-			}
-		}
+	if (betterRenderer) {
+		renderMap();
+	}else{
+		renderMapStandard();
 	}
 
 	for (auto & e : npcs) {
@@ -172,4 +124,97 @@ bool Engine::checkEntityCollisionAtPos(Map::Pos p) {
 		return s->isColliding;
 	}
 	return false;
+}
+
+void Engine::renderMap() {
+	for (int j = 0; j < map.height; j++) {
+		for (int i = 0; i < map.width; i++) {
+			Tile* r = map.GetTileAt(i, j, player->pos.d);
+
+			if (r != nullptr && r->type != r->empty) {
+				TCODConsole::root->setCharBackground(i, j, r->bg);
+				TCODConsole::root->setCharForeground(i, j, r->color);
+				TCODConsole::root->setChar(i, j, r->c);
+			}
+			else if (r != nullptr) {
+				int g = 0;
+				for (int z = player->pos.d; z > -1; --z) {
+					Tile * t = map.GetTileAt(i - g, j - g, z);
+					int temp = g;
+					bool isHidden = false;
+					if (g != 0 && map.GetTileAt((i - g) + 1, (j - g) + 1, z) != nullptr && map.GetTileAt((i - g) + 1, (j - g) + 1, z)->type == Tile::wall && map.GetTileAt((i - g) + 1, (j - g) + 1, z)->isBlocking) {
+						t = map.GetTileAt((i - g) + 1, (j - g) + 1, z);
+						temp--;
+						isHidden = true;
+					}
+					if (t != nullptr && t->type != Tile::empty) {
+						if (t->shadeLimit < g)
+							break;
+
+						TCODColor col = t->color;
+						float a = col.getValue();
+						col.setValue((a / (temp + 1 + (3 - ((t->shadeLimit) / 10)))) - (isHidden * 10));
+						col.setHue(col.getHue() - (g*0.05));
+
+
+						TCODColor bg = t->bg;
+						float b = bg.getValue();
+						bg.setValue((b / (temp + 1 + (3 - ((t->shadeLimit) / 10)))) - (isHidden * 10));
+						bg.setHue(bg.getHue() - (g*4.5));
+
+
+
+						TCODConsole::root->setCharForeground(i, j, col);
+						TCODConsole::root->setCharBackground(i, j, bg);
+						TCODConsole::root->setChar(i, j, t->c);
+						break;
+					}
+
+					g++;
+
+					if (g > layerSize)
+						break;
+				}
+			}
+			else {
+				//Err::ConsoleLog("Something awfull happened while drawing the map... run!");
+			}
+		}
+	}
+}
+
+void Engine::renderMapStandard() {
+	for (int j = 0; j < map.height; j++) {
+		for (int i = 0; i < map.width; i++) {
+			auto layer = map.GetTileAt(i, j, player->pos.d);
+			if(layer != nullptr){
+				TCODColor col = layer->color;
+				TCODColor bg = layer->bg;
+				char c = layer->c;
+				int temp = 2;
+				if(layer->type == TileManager::empty){
+					for (int h = player->pos.d - 1; h > -1; h--) {
+						layer = map.GetTileAt(i, j, h);
+						if (layer != nullptr) {
+							if (layer->type != TileManager::empty) {
+								col = layer->color;
+								bg = layer->bg;
+								c = layer->c;
+								col.setValue(col.getValue() / temp);
+								bg.setValue(bg.getValue() / temp);
+								break;
+							}
+						}
+						temp++;
+						if (temp > layerSize)
+							break;
+					}
+				}
+
+				TCODConsole::root->setCharForeground(i, j, col);
+				TCODConsole::root->setCharBackground(i, j, bg);
+				TCODConsole::root->setChar(i, j, layer->c);
+			}
+		}
+	}
 }

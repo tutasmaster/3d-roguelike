@@ -99,6 +99,15 @@ void PlayerAi::OnTick(std::shared_ptr<Entity> entity)
 	case TCODK_HOME:
 		entity->isColliding = !entity->isColliding;
 		break;
+	case TCODK_F1:
+		engine.layerSize--;
+		break;
+	case TCODK_F2:
+		engine.layerSize++;
+		break;
+	case TCODK_F3:
+		engine.betterRenderer = !engine.betterRenderer;
+		break;
 	default:
 		hasUpdated = false;
 		break;

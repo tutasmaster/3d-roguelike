@@ -27,6 +27,30 @@ TileManager::TileManager() : tiles() {
 	wallNB.type = wall.wall;
 	wallNB.isBlocking = false;
 	tiles.push_back(wallNB);
+
+	Tile dirt;
+	dirt.c = ' ';
+	dirt.bg = TCODColor::darkOrange;
+	dirt.color = TCODColor::yellow;
+	dirt.type = wall.wall;
+	dirt.isBlocking = false;
+	tiles.push_back(dirt);
+
+	Tile grass;
+	grass.c = ' ';
+	grass.bg = TCODColor::green;
+	grass.color = TCODColor::lightGreen;
+	grass.type = wall.wall;
+	grass.isBlocking = false;
+	tiles.push_back(grass);
+
+	Tile stone;
+	stone.c = ' ';
+	stone.bg = TCODColor::grey;
+	stone.color = TCODColor::grey;
+	stone.type = wall.wall;
+	stone.isBlocking = false;
+	tiles.push_back(stone);
 }
 
 Tile* TileManager::GetTileData(TileID tile) {

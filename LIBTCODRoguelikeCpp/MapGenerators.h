@@ -12,9 +12,12 @@ void GeneratePerlinNoiseMap(Map * map) {
 			int value = (int)(noise.get(p, TCOD_NOISE_PERLIN) * 15) + 15;
 
 			for (int h = 0; h < value; h++) {
-				map->SetTileAt(i, j, h, TileManager::wall);
+				map->SetTileAt(i, j, h, TileManager::dirt);
+				if (h < 15) {
+					map->SetTileAt(i, j, h, TileManager::stone);
+				}
 			}
-			//SetTileAt(i, j, value, TileManager::floor);
+			map->SetTileAt(i, j, value, TileManager::grass);
 		}
 	}
 }

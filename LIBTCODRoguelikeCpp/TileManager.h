@@ -33,7 +33,10 @@ public:
 		empty,
 		wall,
 		floor,
-		wallNB
+		wallNB,
+		dirt,
+		grass,
+		stone
 	};
 };
 
