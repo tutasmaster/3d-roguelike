@@ -89,6 +89,10 @@ Map::Pos Map::Pos::operator*(int f) {
 	return n;
 }
 
+bool Map::Pos::operator==(const Pos&b) {
+	return (w == b.w && h == b.h && d == b.d);
+}
+
 void SetMapLayer(Map& m, int l, TileID tile) {
 	for (int j = 0; j < m.height; j++) {
 		for (int i = 0; i < m.width; i++) {

@@ -4,6 +4,12 @@
 
 #include "Entity.h"
 
+class Message {
+public:
+	std::string msg = "xD";
+	TCODColor col = TCODColor::red;
+};
+
 class Engine
 {
 public:
@@ -12,10 +18,16 @@ public:
 	int yPosition;
 
 	std::shared_ptr<Entity> player = std::make_shared<Entity>(Entity());
+	std::vector<std::shared_ptr<Entity>> npcs;
+
+	std::shared_ptr<Entity> checkEntityAtPos(Map::Pos p);
+	bool checkEntityCollisionAtPos(Map::Pos p);
 
 	Map map;
 
 	TCOD_key_t lastKey;
+	
+	std::vector<Message> console;
 
 	Engine();
 	~Engine();

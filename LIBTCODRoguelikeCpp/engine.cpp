@@ -3,60 +3,23 @@
 Engine::Engine() : map(64,64,64)
 {
 
-	TCODConsole::initRoot(128, 80, "Roguelike");
+	TCODConsole::initRoot(64, 80, "Roguelike");
 
 	player->ai = std::make_shared<PlayerAi>();
 
 	SetMapLayer(map, 0, TileManager::floor);
-	
-	DrawSquareOnMap(map, 5, 5, 10, 10, 1, TileManager::wall);
-	DrawSquareOnMap(map, 5, 5, 10, 10, 2, TileManager::wall);
-	DrawSquareOnMap(map, 5, 5, 10, 10, 3, TileManager::wall);
-	DrawSquareOnMap(map, 5, 5, 10, 10, 4, TileManager::wall);
-	DrawSquareOnMap(map, 5, 5, 10, 10, 5, TileManager::wall);
 
-	DrawSquareOnMap(map, 6, 6, 8, 8, 1, TileManager::floor);
-	DrawSquareOnMap(map, 6, 6, 8, 8, 2, TileManager::floor);
-	DrawSquareOnMap(map, 6, 6, 8, 8, 3, TileManager::floor);
-	DrawSquareOnMap(map, 6, 6, 8, 8, 4, TileManager::floor);
-	DrawSquareOnMap(map, 6, 6, 8, 8, 5, TileManager::floor);
+	std::shared_ptr<Entity> npc = std::make_shared<Entity>();
+	npc->pos.w = 10;
+	npc->pos.h = 10;
+	npc->ai = std::make_shared<FriendlyAi>();
+	npcs.push_back(npc);
 
-	DrawSquareOnMap(map, 20, 5, 10, 10, 1, TileManager::wall);
-	DrawSquareOnMap(map, 20, 5, 10, 10, 2, TileManager::wall);
-	DrawSquareOnMap(map, 20, 5, 10, 10, 3, TileManager::wall);
-	DrawSquareOnMap(map, 20, 5, 10, 10, 4, TileManager::wall);
-	DrawSquareOnMap(map, 20, 5, 10, 10, 5, TileManager::wall);
+	Message msg;
+	msg.msg = "Player has entered the world!";
+	msg.col = TCODColor::yellow;
 
-	DrawSquareOnMap(map, 21, 6, 8, 8, 1, TileManager::floor);
-	DrawSquareOnMap(map, 21, 6, 8, 8, 2, TileManager::floor);
-	DrawSquareOnMap(map, 21, 6, 8, 8, 3, TileManager::floor);
-	DrawSquareOnMap(map, 21, 6, 8, 8, 4, TileManager::floor);
-	DrawSquareOnMap(map, 21, 6, 8, 8, 5, TileManager::floor);
-
-	DrawSquareOnMap(map, 14, 8, 7, 4, 3, TileManager::wall);
-	DrawSquareOnMap(map, 14, 8, 2, 4, 4, TileManager::wall);
-	DrawSquareOnMap(map, 14, 9, 7, 2, 4, TileManager::floor);
-
-	DrawSquareOnMap(map, 21, 6, 8, 8, 6, TileManager::wall);
-	DrawSquareOnMap(map, 22, 7, 6, 6, 7, TileManager::wall);
-	DrawSquareOnMap(map, 23, 8, 4, 4, 8, TileManager::wall);
-	DrawSquareOnMap(map, 24, 9, 2, 2, 9, TileManager::wall);
-
-	DrawSquareOnMap(map, 22, 7, 6, 6, 6, TileManager::floor);
-	DrawSquareOnMap(map, 23, 8, 4, 4, 7, TileManager::floor);
-	DrawSquareOnMap(map, 24, 9, 2, 2, 8, TileManager::floor);
-
-	map.SetTileAt(14, 9, 1, TileManager::floor);
-	map.SetTileAt(14, 10, 1, TileManager::floor);
-
-	map.SetTileAt(14, 9, 2, TileManager::empty);
-	map.SetTileAt(14, 10, 2, TileManager::empty);
-
-	map.SetTileAt(20, 9, 1, TileManager::floor);
-	map.SetTileAt(20, 10, 1, TileManager::floor);
-
-	map.SetTileAt(20, 9, 2, TileManager::empty);
-	map.SetTileAt(20, 10, 2, TileManager::empty);
+	console.push_back(msg);
 }
 
 
@@ -135,14 +98,35 @@ void Engine::render()
 		}
 	}
 
+	for (auto & e : npcs) {
+		TCODColor c = e->col;
+		TCODConsole::root->setCharForeground(e->pos.w, e->pos.h, e->col);
+		TCODConsole::root->setChar(e->pos.w, e->pos.h, e->c);
+	}
+
 	TCODConsole::root->setCharBackground(player->pos.w, player->pos.h,map.GetTileAt(player->pos.w, player->pos.h, player->pos.d)->bg);
 	TCODConsole::root->setCharForeground(player->pos.w, player->pos.h,TCODColor::gold);
 	TCODConsole::root->setChar(player->pos.w, player->pos.h, '@');
+
+	int j = 0;
+	for (int i = console.size() - 1; i > -1; i--) {
+		j++;
+		TCODConsole::root->setDefaultForeground(console.at(i).col);
+		TCODConsole::root->print(0, 65 + j, console.at(i).msg.c_str());
+	}
+
 }
 
 void Engine::update()
 {
 	player->ai->OnTick(player);
+	if(player->ai->hasUpdated){
+		for (auto &e : npcs) {
+			if(e->ai != nullptr){
+				e->ai->OnTick(e);
+			}
+		}
+	}
 
 	/*Tile::Type value = map.GetTileAt(x,y,yPosition)->type;
 
@@ -159,4 +143,25 @@ void Engine::update()
 	}*/
 
 
+}
+
+std::shared_ptr<Entity> Engine::checkEntityAtPos(Map::Pos p) {
+	for (auto &e : npcs) {
+		if (e->pos == p){
+			return e;
+		}
+	}
+	
+	if (player->pos == p)
+		return player;
+
+	return nullptr;
+}
+
+bool Engine::checkEntityCollisionAtPos(Map::Pos p) {
+	std::shared_ptr<Entity> s = checkEntityAtPos(p);
+	if (s != nullptr) {
+		return s->isColliding;
+	}
+	return false;
 }

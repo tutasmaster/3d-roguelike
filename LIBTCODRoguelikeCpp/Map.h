@@ -16,6 +16,7 @@ public:
 		Pos operator+(const Pos& p);
 		Pos operator+(int v);
 		Pos operator*(int f);
+		bool operator==(const Pos&b);
 
 		int w;
 		int h;
