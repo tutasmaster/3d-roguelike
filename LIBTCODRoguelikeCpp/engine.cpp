@@ -154,13 +154,13 @@ void Engine::renderMap() {
 						TCODColor col = t->color;
 						float a = col.getValue();
 						col.setValue((a / (temp + 1 + (3 - ((t->shadeLimit) / 10)))) - (isHidden * 10));
-						col.setHue(col.getHue() - (g*0.05));
+						col.setHue(col.getHue() - (g*4.5f));
 
 
 						TCODColor bg = t->bg;
 						float b = bg.getValue();
 						bg.setValue((b / (temp + 1 + (3 - ((t->shadeLimit) / 10)))) - (isHidden * 10));
-						bg.setHue(bg.getHue() - (g*4.5));
+						bg.setHue(bg.getHue() - (g*4.5f));
 
 
 

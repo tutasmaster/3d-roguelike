@@ -1,23 +1,21 @@
-# TutorialRL
+# 3D Roguelike
 
-This is a roguelike I made in C++ and Libtcod as an attempt to wrap my mind around game/engine development. 
-This code was heavily based on Roguebasin's libtcod tutorial at 
-http://www.roguebasin.com/index.php?title=Complete_roguelike_tutorial_using_C%2B%2B_and_libtcod_-_part_1:_setting_up .
+An engine test for a potential 3D roguelike project with a unique rendering technique.
+## Current Features
 
-## Features
-
-  - Map generation using libtcod's BspListener;
-  - Basic inventory system;
-  - Versatile entity system.
+  - Map generation using noise;
+  - Entity system.
+  - Map rendering
 
 ## Controls
 
- - UP, DOWN, LEFT, RIGHT or 8,2,4,6 -> movement
- - I -> inventory/use
- - G -> pick up item
- - 5 -> wait a turn
- - D -> drop item
- - L -> look around
+ - UP, DOWN, LEFT, RIGHT, PGUP, PGDOWN -> movement
+ - HOME   -> enable/disable collision
+ - END    -> build Non Blocking walls
+ - INSERT -> build walls
+ - DELETE -> destroy walls
+ - F1/F2  -> change downward vision
+ - F3     -> change rendering method
 
 ## Requirements
 
@@ -27,15 +25,3 @@ http://www.roguebasin.com/index.php?title=Complete_roguelike_tutorial_using_C%2B
 ## Building
 
 I am not aware how to do it in other systems but the way I do it is on Windows letting VS2017+ compile it while linking the LIBTCOD 1.5.2 library.
-
-## Todo
-
- - Adding armor system;
- - Adding weapon system;
- - More content;
- - Better ai using A* for pathfinding;
- - Spells;
- - Scoring system.
-
-****
-**Thank you for your attention!**
