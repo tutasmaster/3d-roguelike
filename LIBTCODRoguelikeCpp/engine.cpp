@@ -2,12 +2,12 @@
 
 Engine::Engine() 
 {
-	map = new Map(32, 32, 32);
+	map = new Map(64, 64, 64);
 	map->GenerateTerrain(0);
 
 	TCODConsole::initRoot(64, 80, "Roguelike");
 
-	player->ai = std::make_shared<PlayerAi>();
+	player->ai = std::make_shared<WorldBuilderAi>(player);
 
 	for (int i = 0; i < map->depth; i++) {
 		if (map->GetTileAt(0, 0, i)->type != TileManager::wall) {
@@ -67,13 +67,21 @@ void Engine::render()
 
 	TCODConsole::root->setCharBackground(player->pos.w, player->pos.h,map->GetTileAt(player->pos.w, player->pos.h, player->pos.d)->bg);
 	TCODConsole::root->setCharForeground(player->pos.w, player->pos.h,TCODColor::gold);
-	TCODConsole::root->setChar(player->pos.w, player->pos.h, '@');
+	TCODConsole::root->setChar(player->pos.w, player->pos.h, player->c);
 
 	int j = 0;
 	for (int i = console.size() - 1; i > -1; i--) {
 		j++;
 		TCODConsole::root->setDefaultForeground(console.at(i).col);
 		TCODConsole::root->print(0, 65 + j, console.at(i).msg.c_str());
+	}
+
+	if (player->ren != nullptr)
+		player->ren->OnRender(player);
+
+	for (auto & e : npcs) {
+		if (e->ren != nullptr) 
+			e->ren->OnRender(e);
 	}
 
 }

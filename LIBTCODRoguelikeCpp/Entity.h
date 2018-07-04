@@ -28,14 +28,54 @@ public:
 	bool isBuildingNB = false;
 };
 
+class WorldBuilderAi : public Ai {
+public:
+	WorldBuilderAi(std::shared_ptr<Entity> entity);
+	void OnTick(std::shared_ptr<Entity> entity) override;
+
+	enum BuildState {
+		idle,
+		parallelogram,
+		sphere,
+		cylinder
+	} buildState;
+
+	int args = 0;
+
+	void OrderPositions();
+
+	void Build();
+	void BuildBlock();
+	void BuildSphere();
+	void BuildCylinder();
+
+	//Arguments
+	Map::Pos pos1;
+	Map::Pos pos2;
+
+	TileID block = TileManager::wall;
+};
+
+class Renderer {
+public:
+	virtual void OnRender(std::shared_ptr<Entity> entity) = 0;
+};
+
+class WorldBuilderRenderer : public Renderer {
+public:
+	void OnRender(std::shared_ptr<Entity> entity) override;
+};
+
 class Entity
 {
 public:
 	Entity();
+	~Entity();
 
 	Map::Pos pos;
 
 	std::shared_ptr<Ai> ai;
+	std::shared_ptr<Renderer> ren;
 
 	std::string name = "Entity";
 	char c = 'E';
