@@ -1,15 +1,16 @@
 #include "engine.hpp"
 
-Engine::Engine() : map(64,64,64)
+Engine::Engine() 
 {
-	map.GenerateTerrain(0);
+	map = new Map(32, 32, 32);
+	map->GenerateTerrain(0);
 
 	TCODConsole::initRoot(64, 80, "Roguelike");
 
 	player->ai = std::make_shared<PlayerAi>();
 
-	for (int i = 0; i < map.depth; i++) {
-		if (map.GetTileAt(0, 0, i)->type != TileManager::wall) {
+	for (int i = 0; i < map->depth; i++) {
+		if (map->GetTileAt(0, 0, i)->type != TileManager::wall) {
 			player->pos.d = i;
 			break;
 		}
@@ -64,7 +65,7 @@ void Engine::render()
 		TCODConsole::root->setChar(e->pos.w, e->pos.h, e->c);
 	}
 
-	TCODConsole::root->setCharBackground(player->pos.w, player->pos.h,map.GetTileAt(player->pos.w, player->pos.h, player->pos.d)->bg);
+	TCODConsole::root->setCharBackground(player->pos.w, player->pos.h,map->GetTileAt(player->pos.w, player->pos.h, player->pos.d)->bg);
 	TCODConsole::root->setCharForeground(player->pos.w, player->pos.h,TCODColor::gold);
 	TCODConsole::root->setChar(player->pos.w, player->pos.h, '@');
 
@@ -127,9 +128,9 @@ bool Engine::checkEntityCollisionAtPos(Map::Pos p) {
 }
 
 void Engine::renderMap() {
-	for (int j = 0; j < map.height; j++) {
-		for (int i = 0; i < map.width; i++) {
-			Tile* r = map.GetTileAt(i, j, player->pos.d);
+	for (int j = 0; j < map->height; j++) {
+		for (int i = 0; i < map->width; i++) {
+			Tile* r = map->GetTileAt(i, j, player->pos.d);
 
 			if (r != nullptr && r->type != r->empty) {
 				TCODConsole::root->setCharBackground(i, j, r->bg);
@@ -139,11 +140,11 @@ void Engine::renderMap() {
 			else if (r != nullptr) {
 				int g = 0;
 				for (int z = player->pos.d; z > -1; --z) {
-					Tile * t = map.GetTileAt(i - g, j - g, z);
+					Tile * t = map->GetTileAt(i - g, j - g, z);
 					int temp = g;
 					bool isHidden = false;
-					if (g != 0 && map.GetTileAt((i - g) + 1, (j - g) + 1, z) != nullptr && map.GetTileAt((i - g) + 1, (j - g) + 1, z)->type == Tile::wall && map.GetTileAt((i - g) + 1, (j - g) + 1, z)->isBlocking) {
-						t = map.GetTileAt((i - g) + 1, (j - g) + 1, z);
+					if (g != 0 && map->GetTileAt((i - g) + 1, (j - g) + 1, z) != nullptr && map->GetTileAt((i - g) + 1, (j - g) + 1, z)->type == Tile::wall && map->GetTileAt((i - g) + 1, (j - g) + 1, z)->isBlocking) {
+						t = map->GetTileAt((i - g) + 1, (j - g) + 1, z);
 						temp--;
 						isHidden = true;
 					}
@@ -184,9 +185,9 @@ void Engine::renderMap() {
 }
 
 void Engine::renderMapStandard() {
-	for (int j = 0; j < map.height; j++) {
-		for (int i = 0; i < map.width; i++) {
-			auto layer = map.GetTileAt(i, j, player->pos.d);
+	for (int j = 0; j < map->height; j++) {
+		for (int i = 0; i < map->width; i++) {
+			auto layer = map->GetTileAt(i, j, player->pos.d);
 			if(layer != nullptr){
 				TCODColor col = layer->color;
 				TCODColor bg = layer->bg;
@@ -194,7 +195,7 @@ void Engine::renderMapStandard() {
 				int temp = 2;
 				if(layer->type == TileManager::empty){
 					for (int h = player->pos.d - 1; h > -1; h--) {
-						layer = map.GetTileAt(i, j, h);
+						layer = map->GetTileAt(i, j, h);
 						if (layer != nullptr) {
 							if (layer->type != TileManager::empty) {
 								col = layer->color;
@@ -214,6 +215,39 @@ void Engine::renderMapStandard() {
 				TCODConsole::root->setCharForeground(i, j, col);
 				TCODConsole::root->setCharBackground(i, j, bg);
 				TCODConsole::root->setChar(i, j, layer->c);
+			}
+		}
+	}
+}
+
+void Engine::saveMap(const char * name) {
+	TCODZip zip;
+	zip.putInt(map->width);
+	zip.putInt(map->height);
+	zip.putInt(map->depth);
+	for (int j = 0; j < map->height; j++) {
+		for (int i = 0; i < map->width; i++) {
+			for (int h = 0; h < map->depth; h++) {
+				zip.putInt(map->arr[(i)+((j)*map->width) + ((h)*map->height * map->width)]);
+			}
+		}
+	}
+	zip.saveToFile(name);
+}
+
+void Engine::loadMap(const char * name) {
+	TCODZip zip;
+	if(TCODSystem::fileExists(name)){
+		zip.loadFromFile(name);
+		delete map;
+		map = new Map(zip.getInt(), zip.getInt(), zip.getInt());
+		//map = Map(zip.getInt(), zip.getInt(), zip.getInt());
+		
+		for (int j = 0; j < map->height; j++) {
+			for (int i = 0; i < map->width; i++) {
+				for (int h = 0; h < map->depth; h++) {
+					map->arr[(i)+((j)*map->width) + ((h)*map->height * map->width)] = zip.getInt();
+				}
 			}
 		}
 	}

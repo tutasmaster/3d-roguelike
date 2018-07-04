@@ -23,7 +23,7 @@ public:
 	std::shared_ptr<Entity> checkEntityAtPos(Map::Pos p);
 	bool checkEntityCollisionAtPos(Map::Pos p);
 
-	Map map;
+	Map* map;
 
 	TCOD_key_t lastKey;
 	
@@ -40,6 +40,9 @@ public:
 
 	void renderMap();
 	void renderMapStandard();
+
+	void saveMap(const char * name = "default.map");
+	void loadMap(const char * name = "default.map");
 
 	int layerSize = 20;
 	bool betterRenderer = false;

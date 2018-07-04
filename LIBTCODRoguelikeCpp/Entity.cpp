@@ -10,7 +10,7 @@ Entity::Entity()
 void Ai::Move(std::shared_ptr<Entity> entity, int x, int y, int z)
 {
 	Map::Pos p(x, y, z);
-	if  (engine.map.isTilePosValid(p) && (!entity->isColliding || engine.map.GetTileAt(p)->type != TileManager::wall) && !engine.checkEntityCollisionAtPos(p)){
+	if  (engine.map->isTilePosValid(p) && (!entity->isColliding || engine.map->GetTileAt(p)->type != TileManager::wall) && !engine.checkEntityCollisionAtPos(p)){
 		entity->pos = p;
 	}
 }
@@ -56,11 +56,11 @@ void PlayerAi::OnTick(std::shared_ptr<Entity> entity)
 	auto lastKey = TCODConsole::root->checkForKeypress(TCOD_KEY_PRESSED);
 
 	if (isDigging)
-		engine.map.SetTileAt(entity->pos.w, entity->pos.h, entity->pos.d, TileManager::empty);
+		engine.map->SetTileAt(entity->pos.w, entity->pos.h, entity->pos.d, TileManager::empty);
 	else if (isBuilding)
-		engine.map.SetTileAt(entity->pos.w, entity->pos.h, entity->pos.d, TileManager::wall);
+		engine.map->SetTileAt(entity->pos.w, entity->pos.h, entity->pos.d, TileManager::wall);
 	else if (isBuildingNB)
-		engine.map.SetTileAt(entity->pos.w, entity->pos.h, entity->pos.d, TileManager::wallNB);
+		engine.map->SetTileAt(entity->pos.w, entity->pos.h, entity->pos.d, TileManager::wallNB);
 
 	switch (lastKey.vk) {
 	case TCODK_UP:
@@ -107,6 +107,12 @@ void PlayerAi::OnTick(std::shared_ptr<Entity> entity)
 		break;
 	case TCODK_F3:
 		engine.betterRenderer = !engine.betterRenderer;
+		break;
+	case TCODK_F11:
+		engine.saveMap();
+		break;
+	case TCODK_F12:
+		engine.loadMap();
 		break;
 	default:
 		hasUpdated = false;
