@@ -39,6 +39,7 @@ public:
 
 
 	void renderMap();
+	void renderMapInverted();
 	void renderMapZoomedOut();
 	void renderMapStandard();
 

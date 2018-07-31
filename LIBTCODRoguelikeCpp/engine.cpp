@@ -57,7 +57,7 @@ void Engine::render()
 	TCODConsole::root->clear();
 
 	if (betterRenderer) {
-		renderMapZoomedOut();
+		renderMapStandard();
 	}else{
 		renderMap();
 	}
@@ -136,9 +136,9 @@ bool Engine::checkEntityCollisionAtPos(Map::Pos p) {
 }
 
 void Engine::renderMapStandard() {
-	for (int j = 0; j < map->height; j++) {
-		for (int i = 0; i < map->width; i++) {
-			auto layer = map->GetTileAt(i, j, player->pos.d);
+	for (int j = 0; j < 64; j++) {
+		for (int i = 0; i < 64; i++) {
+			auto layer = map->GetTileAt(player->pos.w + i - 32, player->pos.h + j - 32, player->pos.d);
 			if(layer != nullptr){
 				TCODColor col = layer->color;
 				TCODColor bg = layer->bg;
@@ -146,20 +146,19 @@ void Engine::renderMapStandard() {
 				int temp = 2;
 				if(layer->type == TileManager::empty){
 					for (int h = player->pos.d - 1; h > -1; h--) {
-						layer = map->GetTileAt(i, j, h);
+						layer = map->GetTileAt(player->pos.w + i - 32, player->pos.h + j - 32, h);
 						if (layer != nullptr) {
 							if (layer->type != TileManager::empty) {
 								col = layer->color;
 								bg = layer->bg;
 								c = layer->c;
-								col.setValue(col.getValue() / temp);
-								bg.setValue(bg.getValue() / temp);
+								col.setValue(sqrt(col.getValue() / temp));
+								bg.setValue(sqrt(bg.getValue() / temp));
+								bg.setHue(bg.getHue() - (temp * 0.05));
 								break;
 							}
 						}
 						temp++;
-						if (temp > layerSize)
-							break;
 					}
 				}
 
