@@ -94,7 +94,7 @@ void PlayerAi::OnTick(std::shared_ptr<Entity> entity)
 		MoveRelative(entity,  0,  0, -1);
 		hasUpdated = true;
 		break;
-	case TCODK_DELETE:
+	/*case TCODK_DELETE:
 		isDigging = !isDigging;
 		break;
 	case TCODK_INSERT:
@@ -105,7 +105,7 @@ void PlayerAi::OnTick(std::shared_ptr<Entity> entity)
 		break;
 	case TCODK_HOME:
 		entity->isColliding = !entity->isColliding;
-		break;
+		break;*/
 	case TCODK_F1:
 		engine.layerSize--;
 		break;
@@ -328,4 +328,28 @@ void WorldBuilderAi::BuildSphere() {
 
 void WorldBuilderRenderer::OnRender(std::shared_ptr<Entity> entity) {
 	TCODConsole::root->print(0, 0, std::to_string((std::static_pointer_cast<WorldBuilderAi>(entity->ai)->block)).c_str());
+}
+
+void BoulderPhysics::ApplyPhysics(std::shared_ptr<Entity> entity) {
+	if (engine.map->GetTileAt(Map::Pos(entity->pos.w, entity->pos.h, entity->pos.d - 1)) != nullptr && engine.map->GetTileAt(Map::Pos(entity->pos.w, entity->pos.h, entity->pos.d - 1))->type != TileManager::wall) {
+		speedZ -= gravity;
+	}
+
+	speedX *= 1 - drag;
+	speedY *= 1 - drag;
+	speedZ *= 1 - drag;
+
+	relPosX += speedX;
+	relPosY += speedY;
+	relPosZ += speedZ;
+
+	if(engine.map->GetTileAt(entity->pos.w + relPosX, entity->pos.h + relPosY, entity->pos.d + relPosZ)->type == TileManager::empty){
+		entity->pos.w += (int)relPosX;
+		entity->pos.h += (int)relPosY;
+		entity->pos.d += (int)relPosZ;
+	}
+
+	relPosX = (int)relPosX % 1;
+	relPosY = (int)relPosY % 1;
+	relPosZ = (int)relPosZ % 1;
 }

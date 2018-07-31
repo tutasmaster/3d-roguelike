@@ -66,6 +66,19 @@ public:
 	void OnRender(std::shared_ptr<Entity> entity) override;
 };
 
+class Physics {
+public:
+	float relPosX, relPosY, relPosZ;
+	float speedX,speedY,speedZ,gravity;
+	float drag, airDrag;
+	virtual void ApplyPhysics(std::shared_ptr<Entity> entity) = 0;
+};
+
+class BoulderPhysics : public Physics{
+public:
+	void ApplyPhysics(std::shared_ptr<Entity> entity) override;
+};
+
 class Entity
 {
 public:
@@ -76,6 +89,7 @@ public:
 
 	std::shared_ptr<Ai> ai;
 	std::shared_ptr<Renderer> ren;
+	std::shared_ptr<Physics> phys;
 
 	std::string name = "Entity";
 	char c = 'E';

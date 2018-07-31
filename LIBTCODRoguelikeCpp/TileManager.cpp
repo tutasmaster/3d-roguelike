@@ -33,15 +33,15 @@ TileManager::TileManager() : tiles() {
 	dirt.bg = TCODColor::darkOrange;
 	dirt.color = TCODColor::yellow;
 	dirt.type = wall.wall;
-	dirt.isBlocking = false;
+	dirt.isBlocking = true;
 	tiles.push_back(dirt);
 
 	Tile grass;
-	grass.c = ' ';
-	grass.bg = TCODColor::green;
-	grass.color = TCODColor::lightGreen;
+	grass.c = '.';
+	grass.bg = TCODColor::darkGreen;
+	grass.color = TCODColor::white;
 	grass.type = wall.wall;
-	grass.isBlocking = false;
+	grass.isBlocking = true;
 	tiles.push_back(grass);
 
 	Tile stone;
@@ -49,8 +49,47 @@ TileManager::TileManager() : tiles() {
 	stone.bg = TCODColor::grey;
 	stone.color = TCODColor::grey;
 	stone.type = wall.wall;
-	stone.isBlocking = false;
+	stone.isBlocking = true;
 	tiles.push_back(stone);
+
+	Tile water;
+	water.c = ' ';
+	water.bg = TCODColor::blue;
+	water.color = TCODColor::white;
+	water.type = wall.liquid;
+	water.isBlocking = false;
+	tiles.push_back(water);
+
+	Tile wood;
+	wood.c = '%';
+	wood.bg = TCODColor::darkestOrange;
+	wood.color = TCODColor::darkestYellow;
+	wood.type = wall.wall;
+	wood.isBlocking = false;
+	tiles.push_back(wood);
+
+	Tile leaves;
+	leaves.c = '/';
+	leaves.bg = TCODColor::darkestGreen;
+	leaves.color = TCODColor::darkGrey;
+	leaves.type = wall.wall;
+	leaves.isBlocking = false;
+	tiles.push_back(leaves);
+
+	Tile sand;
+	leaves.c = '.';
+	leaves.bg = TCODColor::yellow;
+	leaves.color = TCODColor::white;
+	leaves.type = wall.wall;
+	leaves.isBlocking = false;
+	tiles.push_back(leaves);
+
+	Tile cacti;
+	cacti.c = 'O';
+	cacti.bg = TCODColor::green;
+	cacti.color = TCODColor::darkYellow;
+	cacti.type = wall.wall;
+	tiles.push_back(cacti);
 }
 
 Tile* TileManager::GetTileData(TileID tile) {

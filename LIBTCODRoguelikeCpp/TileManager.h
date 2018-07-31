@@ -8,7 +8,8 @@ public:
 	enum Type {
 		empty,
 		wall,
-		floor
+		floor,
+		liquid
 	} type = empty;
 
 	TCODColor bg = TCODColor::black;
@@ -36,7 +37,12 @@ public:
 		wallNB,
 		dirt,
 		grass,
-		stone
+		stone,
+		water,
+		wood,
+		leaves,
+		sand,
+		cacti
 	};
 };
 

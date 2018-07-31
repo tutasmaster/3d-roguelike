@@ -6,18 +6,102 @@ void GeneratePerlinNoiseMap(Map * map) {
 	TCODRandom* tcodRand = new TCODRandom();
 	TCODNoise noise(2, tcodRand);
 
+	float r = tcodRand->getFloat(0,1);
+
 	for (int j = 0; j < map->height; j++) {
 		for (int i = 0; i < map->width; i++) {
-			float p[2] = { i*0.1, j*0.1 };
-			int value = (int)(noise.get(p, TCOD_NOISE_PERLIN) * 15) + 15;
+			
+			float pBiome[2] = { (i*0.01) + r * 100, (j*0.01) + r * 100 };
+			float biomeValue = noise.get(pBiome, TCOD_NOISE_PERLIN);
+
+			float p[2];
+			int value;
+
+			if(biomeValue > 0.1){
+				p[0] = i * 0.1f;
+				p[1] = j * 0.1f;
+				value = (int)(noise.get(p, TCOD_NOISE_PERLIN) * 15) + 15;
+			}
+			else {
+				p[0] = i * 0.05f;
+				p[1] = j * 0.05f;
+				value = (int)(noise.get(p, TCOD_NOISE_PERLIN) * 10) + 22;
+			}
 
 			for (int h = 0; h < value; h++) {
-				map->SetTileAt(i, j, h, TileManager::dirt);
-				if (h < 15) {
-					map->SetTileAt(i, j, h, TileManager::stone);
+				if(biomeValue > 0.1){
+					map->SetTileAt(i, j, h, TileManager::dirt);
+					if (h < 10) {
+						map->SetTileAt(i, j, h, TileManager::stone);
+					}
+				}
+				else {
+					map->SetTileAt(i, j, h, TileManager::sand);
+					if (h < 5) {
+						map->SetTileAt(i, j, h, TileManager::stone);
+					}
 				}
 			}
-			map->SetTileAt(i, j, value, TileManager::grass);
+			if (value > 13) {
+				if (biomeValue > 0.1) {
+					map->SetTileAt(i, j, value, TileManager::grass);
+				}
+				else {
+					map->SetTileAt(i, j, value, TileManager::sand);
+				}
+			}
+			else{
+					map->SetTileAt(i, j, value, TileManager::dirt);
+			}
+			
+			if (value > 15 && biomeValue > 0.1) {
+				if (rand() % 100 < 1) {
+					map->SetTileAt(i, j, value, TileManager::wood);
+					map->SetTileAt(i, j, value + 1, TileManager::wood);
+					map->SetTileAt(i, j, value + 2, TileManager::wood);
+					map->SetTileAt(i, j, value + 3, TileManager::wood);
+
+					map->SetTileAt(i - 1, j - 1, value + 4, TileManager::leaves);
+					map->SetTileAt(i - 1, j    , value + 4, TileManager::leaves);
+					map->SetTileAt(i - 1, j + 1, value + 4, TileManager::leaves);
+
+					map->SetTileAt(i    , j - 1, value + 4, TileManager::leaves);
+					map->SetTileAt(i    , j    , value + 4, TileManager::leaves);
+					map->SetTileAt(i    , j + 1, value + 4, TileManager::leaves);
+
+					map->SetTileAt(i + 1, j - 1, value + 4, TileManager::leaves);
+					map->SetTileAt(i + 1, j    , value + 4, TileManager::leaves);
+					map->SetTileAt(i + 1, j + 1, value + 4, TileManager::leaves);
+
+					map->SetTileAt(i - 1, j    , value + 5, TileManager::leaves);
+
+					map->SetTileAt(i    , j - 1, value + 5, TileManager::leaves);
+					map->SetTileAt(i    , j    , value + 5, TileManager::leaves);
+					map->SetTileAt(i    , j + 1, value + 5, TileManager::leaves);
+
+					map->SetTileAt(i + 1, j    , value + 5, TileManager::leaves);
+
+					map->SetTileAt(i    , j    , value + 6, TileManager::leaves);
+				}
+			}
+			else if (value > 15) {
+				if (rand() % 20 < 1) {
+					map->SetTileAt(i, j, value, TileManager::cacti);
+					map->SetTileAt(i, j, value + 1, TileManager::cacti);
+					map->SetTileAt(i, j, value + 2, TileManager::cacti);
+				}
+			}
+			
+		}
+	}
+
+	for (int j = 0; j < map->height; j++) {
+		for (int i = 0; i < map->width; i++) {
+			for (int h = 0; h < 17; h++) {
+				if (map->GetTileAt(i, j, h) != nullptr && map->GetTileAt(i, j, h)->type == TileManager::empty) {
+					map->SetTileAt(i, j, h, TileManager::water);
+				}
+			}
 		}
 	}
 }
@@ -32,9 +116,9 @@ void GeneratePerlinFBMNoiseMap(Map * map) {
 			int value = (int)(noise.getFbm(p,32.f, TCOD_NOISE_PERLIN) * 15) + 15;
 			map->SetTileAt(0, 0, 0, TileManager::wall);
 			for (int h = 0; h < value; h++) {
-				map->SetTileAt(i, j, h, TileManager::wall);
+				map->SetTileAt(i, j, h, TileManager::dirt);
 			}
-			//SetTileAt(i, j, value, TileManager::floor);
+			map->SetTileAt(i, j, value, TileManager::grass);
 		}
 	}
 }

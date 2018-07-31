@@ -39,6 +39,7 @@ public:
 
 
 	void renderMap();
+	void renderMapZoomedOut();
 	void renderMapStandard();
 
 	void saveMap(const char * name = "default.map");
