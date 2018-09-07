@@ -71,19 +71,19 @@ void PlayerAi::OnTick(std::shared_ptr<Entity> entity)
 
 	switch (lastKey.vk) {
 	case TCODK_UP:
-		MoveRelative(entity,  0, -1,  0);
+		OnMoveSideways(entity,  0, -1);
 		hasUpdated = true;
 		break;
 	case TCODK_DOWN:
-		MoveRelative(entity,  0,  1,  0);
+		OnMoveSideways(entity,  0,  1);
 		hasUpdated = true;
 		break;
 	case TCODK_LEFT:
-		MoveRelative(entity, -1,  0,  0);
+		OnMoveSideways(entity, -1,  0);
 		hasUpdated = true;
 		break;
 	case TCODK_RIGHT:
-		MoveRelative(entity,  1,  0,  0);
+		OnMoveSideways(entity,  1,  0);
 		hasUpdated = true;
 		break;
 	case TCODK_PAGEUP:
@@ -124,6 +124,48 @@ void PlayerAi::OnTick(std::shared_ptr<Entity> entity)
 	default:
 		hasUpdated = false;
 		break;
+	}
+
+
+
+}
+
+void PlayerAi::OnMoveSideways(std::shared_ptr<Entity> entity, int x, int y)
+{
+	Map::Pos p   (entity->pos.w + x, entity->pos.h + y, entity->pos.d);
+
+	if (entity->isColliding) {
+		Map::Pos top (entity->pos.w + x, entity->pos.h + y, entity->pos.d + 1);
+		Map::Pos bot (entity->pos.w + x, entity->pos.h + y, entity->pos.d - 1);
+		Map::Pos botB(entity->pos.w + x, entity->pos.h + y, entity->pos.d - 2);
+		Map::Pos topP(entity->pos.w    , entity->pos.h    , entity->pos.d + 1);
+
+		bool cB, tB, bB, bbB, tpB; //yarr yarr fiddle dee dee, shitty variable names is alright with me.
+		
+		cB  = engine.map->isTilePosWalkable(p);
+
+		tB  = engine.map->isTilePosWalkable(top);
+		bB  = engine.map->isTilePosWalkable(bot);
+		bbB = engine.map->isTilePosWalkable(botB);
+		tpB = engine.map->isTilePosWalkable(topP);
+
+		if (!bbB && bB && cB)
+			entity->pos = bot;
+		else if (!bB && cB)
+			entity->pos = p;
+		else if (tB && tpB && !cB)
+			entity->pos = top;
+		else if (cB && bB && bbB) {
+			Message msg;
+			msg.msg = "You tried to end it all. But failed.";
+			msg.col = TCODColor::red;
+
+			engine.console.push_back(msg);
+		}
+
+	}
+	else {
+		entity->pos = p;
 	}
 
 }

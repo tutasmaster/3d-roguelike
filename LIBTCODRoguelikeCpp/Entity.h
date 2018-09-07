@@ -23,6 +23,7 @@ class FriendlyAi : public Ai {
 class PlayerAi : public Ai {
 public:
 	void OnTick(std::shared_ptr<Entity> entity) override;
+	void OnMoveSideways(std::shared_ptr<Entity> entity, int x, int y);
 	bool isDigging = false;
 	bool isBuilding = false;
 	bool isBuildingNB = false;

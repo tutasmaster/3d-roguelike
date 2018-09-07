@@ -35,6 +35,9 @@ public:
 	bool isTilePosValid(const Pos p);
 	bool isTilePosValid(const int w, const int h, const int d);
 
+	bool isTilePosWalkable(const Pos p);
+	bool isTilePosWalkable(const int w, const int h, const int d);
+
 	void GenerateTerrain(int type);
 
 	TileID * arr;

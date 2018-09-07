@@ -2,6 +2,8 @@
 
 #include "MapGenerators.h"
 
+#include "engine.hpp"
+
 Map::Map(int w = 255, int h = 255, int d = 255) : width(w) , height(h) , depth(d)
 {
 	arr = new TileID[w*h*d];
@@ -58,7 +60,16 @@ bool Map::isTilePosValid(int w, int h, int d) {
 	return ((w > -1 && h > -1 && d > -1) && (w < width && h < height && d < depth));
 }
 
+bool Map::isTilePosWalkable(Pos p) {
+	return (isTilePosValid(p) &&
+		GetTileAt(p)->type != TileManager::wall &&
+		!engine.checkEntityCollisionAtPos(p));
+}
 
+bool Map::isTilePosWalkable(int w, int h, int d) {
+	Pos p(w, h, d);
+	return isTilePosWalkable(p);
+}
 
 Map::Pos Map::Pos::operator+(const Pos& p) {
 	Pos v(0,0,0);
