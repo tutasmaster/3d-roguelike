@@ -17,7 +17,7 @@ Entity::~Entity()
 void Ai::Move(std::shared_ptr<Entity> entity, int x, int y, int z)
 {
 	Map::Pos p(x, y, z);
-	if  (engine.map->isTilePosValid(p) && (!entity->isColliding || engine.map->GetTileAt(p)->type != TileManager::wall) && !engine.checkEntityCollisionAtPos(p)){
+	if  (engine.map->isPosValid(p) && (!entity->isColliding || engine.map->GetTileAt(p)->type != TileManager::tile_wall) && !engine.checkEntityCollisionAtPos(p)){
 		entity->pos = p;
 	}
 }
@@ -63,11 +63,11 @@ void PlayerAi::OnTick(std::shared_ptr<Entity> entity)
 	auto lastKey = TCODConsole::root->checkForKeypress(TCOD_KEY_PRESSED);
 
 	if (isDigging)
-		engine.map->SetTileAt(entity->pos.w, entity->pos.h, entity->pos.d, TileManager::empty);
+		engine.map->SetTileAt(entity->pos.w, entity->pos.h, entity->pos.d, TileManager::tile_empty);
 	else if (isBuilding)
-		engine.map->SetTileAt(entity->pos.w, entity->pos.h, entity->pos.d, TileManager::wall);
+		engine.map->SetTileAt(entity->pos.w, entity->pos.h, entity->pos.d, TileManager::tile_wall);
 	else if (isBuildingNB)
-		engine.map->SetTileAt(entity->pos.w, entity->pos.h, entity->pos.d, TileManager::wallNB);
+		engine.map->SetTileAt(entity->pos.w, entity->pos.h, entity->pos.d, TileManager::tile_wallNB);
 
 	switch (lastKey.vk) {
 	case TCODK_UP:
@@ -373,7 +373,7 @@ void WorldBuilderRenderer::OnRender(std::shared_ptr<Entity> entity) {
 }
 
 void BoulderPhysics::ApplyPhysics(std::shared_ptr<Entity> entity) {
-	if (engine.map->GetTileAt(Map::Pos(entity->pos.w, entity->pos.h, entity->pos.d - 1)) != nullptr && engine.map->GetTileAt(Map::Pos(entity->pos.w, entity->pos.h, entity->pos.d - 1))->type != TileManager::wall) {
+	if (engine.map->GetTileAt(Map::Pos(entity->pos.w, entity->pos.h, entity->pos.d - 1)) != nullptr && engine.map->GetTileAt(Map::Pos(entity->pos.w, entity->pos.h, entity->pos.d - 1))->type != TileManager::tile_wall) {
 		speedZ -= gravity;
 	}
 
@@ -385,7 +385,7 @@ void BoulderPhysics::ApplyPhysics(std::shared_ptr<Entity> entity) {
 	relPosY += speedY;
 	relPosZ += speedZ;
 
-	if(engine.map->GetTileAt(entity->pos.w + relPosX, entity->pos.h + relPosY, entity->pos.d + relPosZ)->type == TileManager::empty){
+	if(engine.map->GetTileAt(entity->pos.w + relPosX, entity->pos.h + relPosY, entity->pos.d + relPosZ)->type == TileManager::tile_empty){
 		entity->pos.w += (int)relPosX;
 		entity->pos.h += (int)relPosY;
 		entity->pos.d += (int)relPosZ;

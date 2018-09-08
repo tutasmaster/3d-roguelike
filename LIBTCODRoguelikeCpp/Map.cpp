@@ -7,9 +7,11 @@
 Map::Map(int w = 255, int h = 255, int d = 255) : width(w) , height(h) , depth(d)
 {
 	arr = new TileID[w*h*d];
+	groundArr = new GroundID[w*h*d];
 
 	for (int i = 0; i < w*h*d; i++) {
 		arr[i] = 0;
+		groundArr[i] = 0;
 	}
 }
 
@@ -33,9 +35,27 @@ Tile* Map::GetTileAt(int w, int h, int d) {
 	return nullptr;
 }
 
+bool Map::SetAt(const Pos p, TileID tile, GroundID ground) {
+	if (isPosValid(p)) {
+		groundArr[(p.w) + ((p.h)*width) + ((p.d)*height * width)] = ground;
+		arr[(p.w) + ((p.h)*width) + ((p.d)*height * width)] = tile;
+		return true;
+	}
+	return false;
+}
+
+bool Map::SetAt(const int w, const int h, const int d, TileID tile, GroundID ground) {
+	if (isPosValid(w, h, d)) {
+		groundArr[(w)+((h)*width) + ((d)*height * width)] = ground;
+		arr[(w)+((h)*width) + ((d)*height * width)] = tile;
+		return true;
+	}
+	return false;
+}
+
 
 bool Map::SetTileAt(const Pos p, TileID tile) {
-	if (isTilePosValid(p)) {
+	if (isPosValid(p)) {
 		arr[(p.w) + ((p.h)*width) + ((p.d)*height * width)] = tile;
 		return true;
 	}
@@ -43,7 +63,7 @@ bool Map::SetTileAt(const Pos p, TileID tile) {
 }
 
 bool Map::SetTileAt(const int w, const int h, const int d, TileID tile) {
-	if(isTilePosValid(w,h,d)){
+	if(isPosValid(w,h,d)){
 		arr[(w) + ((h)*width) + ((d)*height * width)] = tile;
 		return true;
 	}
@@ -52,17 +72,17 @@ bool Map::SetTileAt(const int w, const int h, const int d, TileID tile) {
 
 
 
-bool Map::isTilePosValid(Pos p) {
+bool Map::isPosValid(Pos p) {
 	return ((p.w > -1 && p.h > -1 && p.d > -1) && (p.w < width && p.h < height && p.d < depth));
 }
 
-bool Map::isTilePosValid(int w, int h, int d) {
+bool Map::isPosValid(int w, int h, int d) {
 	return ((w > -1 && h > -1 && d > -1) && (w < width && h < height && d < depth));
 }
 
 bool Map::isTilePosWalkable(Pos p) {
-	return (isTilePosValid(p) &&
-		GetTileAt(p)->type != TileManager::wall &&
+	return (isPosValid(p) &&
+		GetTileAt(p)->type != TileManager::tile_wall &&
 		!engine.checkEntityCollisionAtPos(p));
 }
 
@@ -70,6 +90,41 @@ bool Map::isTilePosWalkable(int w, int h, int d) {
 	Pos p(w, h, d);
 	return isTilePosWalkable(p);
 }
+
+
+Ground* Map::GetGroundAt(Pos pos) {
+	if ((pos.w > -1 && pos.h > -1 && pos.d > -1) &&
+		(pos.w < width && pos.h < height && pos.d < depth))
+		return tileManager.GetGroundData(groundArr[pos.w + (pos.h * width) + (pos.d * width * height)]);
+	return nullptr;
+}
+
+Ground* Map::GetGroundAt(int w, int h, int d) {
+	if ((w > -1 && h > -1 && d > -1) &&
+		(w < width && h < height && d < depth))
+		return tileManager.GetGroundData(groundArr[w + (h * width) + (d * width * height)]);
+	return nullptr;
+}
+
+
+bool Map::SetGroundAt(const Pos p, GroundID tile) {
+	if (isPosValid(p)) {
+		groundArr[(p.w) + ((p.h)*width) + ((p.d)*height * width)] = tile;
+		return true;
+	}
+	return false;
+}
+
+bool Map::SetGroundAt(const int w, const int h, const int d, GroundID tile) {
+	if (isPosValid(w, h, d)) {
+		groundArr[(w)+((h)*width) + ((d)*height * width)] = tile;
+		return true;
+	}
+	return false;
+}
+
+
+
 
 Map::Pos Map::Pos::operator+(const Pos& p) {
 	Pos v(0,0,0);

@@ -29,18 +29,31 @@ public:
 	Tile* GetTileAt(Pos p);
 	Tile* GetTileAt(int w, int h, int d);
 
+	bool SetAt(const Pos p, TileID tile, GroundID ground);
+	bool SetAt(const int w, const int h, const int d, TileID tile, GroundID ground);
+
 	bool SetTileAt(const Pos p, TileID tile);
 	bool SetTileAt(const int w, const int h, const int d, TileID tile);
 
-	bool isTilePosValid(const Pos p);
-	bool isTilePosValid(const int w, const int h, const int d);
+	bool isPosValid(const Pos p);
+	bool isPosValid(const int w, const int h, const int d);
 
 	bool isTilePosWalkable(const Pos p);
 	bool isTilePosWalkable(const int w, const int h, const int d);
 
+	
+	Ground* GetGroundAt(Pos p);
+	Ground* GetGroundAt(int w, int h, int d);
+
+	bool SetGroundAt(const Pos p, GroundID tile);
+	bool SetGroundAt(const int w, const int h, const int d, GroundID tile);
+
+
+
 	void GenerateTerrain(int type);
 
 	TileID * arr;
+	GroundID * groundArr;
 
 	int width, height, depth;
 

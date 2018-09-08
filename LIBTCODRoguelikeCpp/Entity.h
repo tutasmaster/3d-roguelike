@@ -54,7 +54,7 @@ public:
 	Map::Pos pos1;
 	Map::Pos pos2;
 
-	TileID block = TileManager::wall;
+	TileID block = TileManager::tile_wall;
 };
 
 class Renderer {

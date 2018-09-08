@@ -64,65 +64,67 @@ void GeneratePerlinNoiseMap(Map * map) {
 
 			for (int h = 0; h < value; h++) {
 				if(biomeValue > 0.1){
-					map->SetTileAt(i, j, h, TileManager::dirt);
+					map->SetAt(i, j, h, TileManager::tile_dirt, TileManager::ground_grass);
 					if (h < 10) {
-						map->SetTileAt(i, j, h, TileManager::stone);
+						map->SetAt(i, j, h, TileManager::tile_stone, TileManager::ground_empty);
 					}
 				}
 				else {
-					map->SetTileAt(i, j, h, TileManager::sand);
+					map->SetAt(i, j, h, TileManager::tile_sand, TileManager::ground_empty);
 					if (h < 5) {
-						map->SetTileAt(i, j, h, TileManager::stone);
+						map->SetAt(i, j, h, TileManager::tile_stone, TileManager::ground_empty);
 					}
 				}
 			}
 			if (value > 13) {
 				if (biomeValue > 0.1) {
-					map->SetTileAt(i, j, value, TileManager::grass);
+					map->SetAt(i, j, value, TileManager::tile_grass, TileManager::ground_grass);
+					map->SetGroundAt(i, j, value + 1, TileManager::ground_grass);
 				}
 				else {
-					map->SetTileAt(i, j, value, TileManager::sand);
+					map->SetTileAt(i, j, value, TileManager::tile_sand);
+					map->SetGroundAt(i, j, value + 1, TileManager::ground_sand);
 				}
 			}
 			else{
-					map->SetTileAt(i, j, value, TileManager::dirt);
+					map->SetTileAt(i, j, value, TileManager::tile_dirt);
 			}
 			
 			if (value > 15 && biomeValue > 0.1) {
 				if (rand() % 100 < 1) {
-					map->SetTileAt(i, j, value, TileManager::wood);
-					map->SetTileAt(i, j, value + 1, TileManager::wood);
-					map->SetTileAt(i, j, value + 2, TileManager::wood);
-					map->SetTileAt(i, j, value + 3, TileManager::wood);
+					map->SetTileAt(i, j, value, TileManager::tile_wood);
+					map->SetTileAt(i, j, value + 1, TileManager::tile_wood);
+					map->SetTileAt(i, j, value + 2, TileManager::tile_wood);
+					map->SetTileAt(i, j, value + 3, TileManager::tile_wood);
 
-					map->SetTileAt(i - 1, j - 1, value + 4, TileManager::leaves);
-					map->SetTileAt(i - 1, j    , value + 4, TileManager::leaves);
-					map->SetTileAt(i - 1, j + 1, value + 4, TileManager::leaves);
+					map->SetTileAt(i - 1, j - 1, value + 4, TileManager::tile_leaves);
+					map->SetTileAt(i - 1, j    , value + 4, TileManager::tile_leaves);
+					map->SetTileAt(i - 1, j + 1, value + 4, TileManager::tile_leaves);
 
-					map->SetTileAt(i    , j - 1, value + 4, TileManager::leaves);
-					map->SetTileAt(i    , j    , value + 4, TileManager::leaves);
-					map->SetTileAt(i    , j + 1, value + 4, TileManager::leaves);
+					map->SetTileAt(i    , j - 1, value + 4, TileManager::tile_leaves);
+					map->SetTileAt(i    , j    , value + 4, TileManager::tile_leaves);
+					map->SetTileAt(i    , j + 1, value + 4, TileManager::tile_leaves);
 
-					map->SetTileAt(i + 1, j - 1, value + 4, TileManager::leaves);
-					map->SetTileAt(i + 1, j    , value + 4, TileManager::leaves);
-					map->SetTileAt(i + 1, j + 1, value + 4, TileManager::leaves);
+					map->SetTileAt(i + 1, j - 1, value + 4, TileManager::tile_leaves);
+					map->SetTileAt(i + 1, j    , value + 4, TileManager::tile_leaves);
+					map->SetTileAt(i + 1, j + 1, value + 4, TileManager::tile_leaves);
 
-					map->SetTileAt(i - 1, j    , value + 5, TileManager::leaves);
+					map->SetTileAt(i - 1, j    , value + 5, TileManager::tile_leaves);
 
-					map->SetTileAt(i    , j - 1, value + 5, TileManager::leaves);
-					map->SetTileAt(i    , j    , value + 5, TileManager::leaves);
-					map->SetTileAt(i    , j + 1, value + 5, TileManager::leaves);
+					map->SetTileAt(i    , j - 1, value + 5, TileManager::tile_leaves);
+					map->SetTileAt(i    , j    , value + 5, TileManager::tile_leaves);
+					map->SetTileAt(i    , j + 1, value + 5, TileManager::tile_leaves);
 
-					map->SetTileAt(i + 1, j    , value + 5, TileManager::leaves);
+					map->SetTileAt(i + 1, j    , value + 5, TileManager::tile_leaves);
 
-					map->SetTileAt(i    , j    , value + 6, TileManager::leaves);
+					map->SetTileAt(i    , j    , value + 6, TileManager::tile_leaves);
 				}
 			}
 			else if (value > 15) {
 				if (rand() % 20 < 1) {
-					map->SetTileAt(i, j, value, TileManager::cacti);
-					map->SetTileAt(i, j, value + 1, TileManager::cacti);
-					map->SetTileAt(i, j, value + 2, TileManager::cacti);
+					map->SetTileAt(i, j, value, TileManager::tile_cacti);
+					map->SetTileAt(i, j, value + 1, TileManager::tile_cacti);
+					map->SetTileAt(i, j, value + 2, TileManager::tile_cacti);
 				}
 			}
 			
@@ -132,8 +134,8 @@ void GeneratePerlinNoiseMap(Map * map) {
 	for (int j = 0; j < map->height; j++) {
 		for (int i = 0; i < map->width; i++) {
 			for (int h = 0; h < 20; h++) {
-				if (map->GetTileAt(i, j, h) != nullptr && map->GetTileAt(i, j, h)->type == TileManager::empty) {
-					map->SetTileAt(i, j, h, TileManager::water);
+				if (map->GetTileAt(i, j, h) != nullptr && map->GetTileAt(i, j, h)->type == TileManager::tile_empty) {
+					map->SetTileAt(i, j, h, TileManager::tile_water);
 				}
 			}
 		}
@@ -148,11 +150,11 @@ void GeneratePerlinFBMNoiseMap(Map * map) {
 		for (int i = 0; i < map->width; i++) {
 			float p[2] = { i*0.1, j*0.1 };
 			int value = (int)(noise.getFbm(p,32.f, TCOD_NOISE_PERLIN) * 15) + 15;
-			map->SetTileAt(0, 0, 0, TileManager::wall);
+			map->SetTileAt(0, 0, 0, TileManager::tile_wall);
 			for (int h = 0; h < value; h++) {
-				map->SetTileAt(i, j, h, TileManager::dirt);
+				map->SetTileAt(i, j, h, TileManager::tile_dirt);
 			}
-			map->SetTileAt(i, j, value, TileManager::grass);
+			map->SetTileAt(i, j, value, TileManager::tile_grass);
 		}
 	}
 }
@@ -167,7 +169,7 @@ void GeneratePerlinTurbulenceNoiseMap(Map * map) {
 			int value = (int)(noise.getTurbulence(p, 32.f, TCOD_NOISE_PERLIN) * 15) + 15;
 
 			for (int h = 0; h < value; h++) {
-				map->SetTileAt(i, j, h, TileManager::wall);
+				map->SetTileAt(i, j, h, TileManager::tile_wall);
 			}
 			//SetTileAt(i, j, value, TileManager::floor);
 		}
@@ -184,7 +186,7 @@ void GeneratePerlinRigidNoiseMap(Map * map) {
 			int value = (int)((1-(-abs(noise.get(p, TCOD_NOISE_PERLIN))+1)) * 15) + 15;
 
 			for (int h = 0; h < value; h++) {
-				map->SetTileAt(i, j, h, TileManager::wall);
+				map->SetTileAt(i, j, h, TileManager::tile_wall);
 			}
 			//SetTileAt(i, j, value, TileManager::floor);
 		}
@@ -201,7 +203,7 @@ void GenerateSimplexNoiseMap(Map * map) {
 			int value = (int)(noise.get(p, TCOD_NOISE_SIMPLEX) * 15) + 15;
 
 			for (int h = 0; h < value; h++) {
-				map->SetTileAt(i, j, h, TileManager::wall);
+				map->SetTileAt(i, j, h, TileManager::tile_wall);
 			}
 			//SetTileAt(i, j, value, TileManager::floor);
 		}
@@ -218,7 +220,7 @@ void GenerateSimplexFBMNoiseMap(Map * map) {
 			int value = (int)(noise.getFbm(p,32.f, TCOD_NOISE_SIMPLEX) * 15) + 15;
 
 			for (int h = 0; h < value; h++) {
-				map->SetTileAt(i, j, h, TileManager::wall);
+				map->SetTileAt(i, j, h, TileManager::tile_wall);
 			}
 			//SetTileAt(i, j, value, TileManager::floor);
 		}
@@ -235,7 +237,7 @@ void GenerateSimplexTurbulenceNoiseMap(Map * map) {
 			int value = (int)(noise.getTurbulence(p, 32.f, TCOD_NOISE_SIMPLEX) * 15) + 15;
 
 			for (int h = 0; h < value; h++) {
-				map->SetTileAt(i, j, h, TileManager::wall);
+				map->SetTileAt(i, j, h, TileManager::tile_wall);
 			}
 			//SetTileAt(i, j, value, TileManager::floor);
 		}
@@ -252,7 +254,7 @@ void GenerateWaveletNoiseMap(Map * map) {
 			int value = (int)(noise.get(p, TCOD_NOISE_WAVELET) * 15) + 15;
 
 			for (int h = 0; h < value; h++) {
-				map->SetTileAt(i, j, h, TileManager::wall);
+				map->SetTileAt(i, j, h, TileManager::tile_wall);
 			}
 			//SetTileAt(i, j, value, TileManager::floor);
 		}
@@ -269,7 +271,7 @@ void GenerateWaveletFBMNoiseMap(Map * map) {
 			int value = (int)(noise.getFbm(p, 32.f, TCOD_NOISE_WAVELET) * 15) + 15;
 
 			for (int h = 0; h < value; h++) {
-				map->SetTileAt(i, j, h, TileManager::wall);
+				map->SetTileAt(i, j, h, TileManager::tile_wall);
 			}
 			//SetTileAt(i, j, value, TileManager::floor);
 		}
@@ -286,7 +288,7 @@ void GenerateWaveletTurbulenceNoiseMap(Map * map) {
 			int value = (int)(noise.getTurbulence(p, 32.f, TCOD_NOISE_WAVELET) * 15) + 15;
 
 			for (int h = 0; h < value; h++) {
-				map->SetTileAt(i, j, h, TileManager::wall);
+				map->SetTileAt(i, j, h, TileManager::tile_wall);
 			}
 			//SetTileAt(i, j, value, TileManager::floor);
 		}

@@ -24,28 +24,40 @@ void Engine::renderMap() {
 				//Let's make sure we are looking at the right tile
 				Map::Pos newPosition(currentPosition.w - depth + 1, currentPosition.h - depth + 1, currentPosition.d - depth);
 
-				if (z >= player->pos.d - 1) {
+				if (z >= player->pos.d - 1)
 					newPosition = Map::Pos(currentPosition.w, currentPosition.h, currentPosition.d - depth);
-				}
+				
 
 				Tile * currentTile = map->GetTileAt(newPosition);
+				Ground * currentGround = map->GetGroundAt(newPosition);
 
 				//Let's skip invalid tiles (they only happen outside of the map so we will skip the rest of the depth search)
 				//Or if we have looked farther than we currently allow by the engine.
-				if (currentTile == nullptr)
+				if (currentTile == nullptr || currentGround == nullptr) {
 					break;
+				}
 
+
+				bool isGround = false;
 				//No point in doing anything to an air tile
-				if (currentTile->type == TileManager::empty){
+				//We also check for what we have found
+				if (currentTile->type == TileManager::tile_empty && currentGround->type == TileManager::ground_empty){
 					depth++;
 					continue;
 				}
-
+				else if (currentTile->type != TileManager::tile_empty) {
+					isGround = false;
+				}
+				else {
+					isGround = true;
+				}
+				
+				
 				//Let's try to fix some edges
 				Tile * blockingTile = map->GetTileAt(newPosition.w + 1, newPosition.h + 1, newPosition.d);
 
 				//I can only fix edges on the bottom layers
-				if (z < player->pos.d - 1 && depth != 0 && blockingTile != nullptr) {
+				if (!isGround && z < player->pos.d - 1 && depth != 0 && blockingTile != nullptr) {
 					
 					//I give priority to any tile to the bottom and right of the current block
 					if (blockingTile->type == Tile::wall) {
@@ -65,20 +77,31 @@ void Engine::renderMap() {
 				}
 
 				//Getting all the colors for posterior manipulation
-				TCODColor tileColor = currentTile->color;
-				TCODColor tileBackground = currentTile->bg;
-				char tileCharacter = currentTile->c;
+				TCODColor tileColor = TCODColor::white;
+				TCODColor tileBackground = TCODColor::white;
+				char tileCharacter = ' ';
+
+				if(isGround){
+					tileColor = currentGround->color;
+					tileBackground = currentGround->bg;
+					tileCharacter = currentGround->c;
+				}
+				else {
+					tileColor = currentTile->color;
+					tileBackground = currentTile->bg;
+					tileCharacter = currentTile->c;
+				}
 
 				float bgValue = tileBackground.getValue();
 				float bgHue = tileBackground.getHue();
 				float bgSaturation = tileBackground.getSaturation();
 
-				float colValue = tileBackground.getValue();
-				float colHue = tileBackground.getHue();
-				float colSaturation = tileBackground.getSaturation();
+				float colValue = tileColor.getValue();
+				float colHue = tileColor.getHue();
+				float colSaturation = tileColor.getSaturation();
 				
 				//Handling water
-				if (currentTile->type == Tile::liquid) {
+				/*if (currentTile->type == Tile::liquid) {
 					//Using custom values to add to the current tile's color
 					float value = 0;
 					float hue = 0;
@@ -124,7 +147,7 @@ void Engine::renderMap() {
 					TCODConsole::root->setChar(i, j, tileCharacter);
 
 					break;
-				}
+				}*/
 
 
 				//Doing the color calculations apropriately
@@ -142,7 +165,7 @@ void Engine::renderMap() {
 				TCODConsole::root->setChar(i, j, tileCharacter);
 
 				//Let's stop the search if we have hit a drawable object
-				if (currentTile->type != TileManager::empty)
+				if (currentTile->type != TileManager::tile_empty || currentGround->type != TileManager::ground_empty)
 					break;
 			}
 		}
@@ -183,7 +206,7 @@ void Engine::renderMapInverted() {
 					break;
 
 				//No point in doing anything to an air tile
-				if (currentTile->type == TileManager::empty) {
+				if (currentTile->type == TileManager::tile_empty) {
 					depth++;
 					continue;
 				}
@@ -245,7 +268,7 @@ void Engine::renderMapInverted() {
 								hue += currentTile->bg.getHue();
 								saturation += currentTile->bg.getSaturation();
 
-								if (currentTile->type == Tile::wall)
+								if (currentTile->type == Tile::empty)
 									break;
 							}
 							else {
@@ -289,7 +312,7 @@ void Engine::renderMapInverted() {
 				TCODConsole::root->setChar(i, j, tileCharacter);
 
 				//Let's stop the search if we have hit a drawable object
-				if (currentTile->type != TileManager::empty)
+				if (currentTile->type != TileManager::tile_empty)
 					break;
 			}
 		}
@@ -330,7 +353,7 @@ void Engine::renderMapZoomedOut() {
 					break;
 
 				//No point in doing anything to an air tile
-				if (currentTile->type == TileManager::empty) {
+				if (currentTile->type == TileManager::tile_empty) {
 					depth++;
 					continue;
 				}
@@ -436,7 +459,7 @@ void Engine::renderMapZoomedOut() {
 				TCODConsole::root->setChar(i, j, tileCharacter);
 
 				//Let's stop the search if we have hit a drawable object
-				if (currentTile->type != TileManager::empty)
+				if (currentTile->type != TileManager::tile_empty)
 					break;
 			}
 		}

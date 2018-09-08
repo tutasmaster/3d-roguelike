@@ -10,7 +10,7 @@ Engine::Engine()
 	player->ai = std::make_shared<PlayerAi>();
 
 	for (int i = 0; i < map->depth; i++) {
-		if (map->GetTileAt(128, 128, i)->type != TileManager::wall) {
+		if (map->GetTileAt(128, 128, i)->type != TileManager::tile_wall) {
 			player->pos.d = i;
 			player->pos.w = 128;
 			player->pos.h = 128;
@@ -99,7 +99,7 @@ void Engine::update()
 
 	/*Tile::Type value = map.GetTileAt(x,y,yPosition)->type;
 
-	if (value == Tile::Type::wall) {
+	if (value == Tile::Type::tile_wall) {
 		yPosition++;
 	}
 	else if (value == 0) {
@@ -144,11 +144,11 @@ void Engine::renderMapStandard() {
 				TCODColor bg = layer->bg;
 				char c = layer->c;
 				int temp = 2;
-				if(layer->type == TileManager::empty){
+				if(layer->type == TileManager::tile_empty){
 					for (int h = player->pos.d - 1; h > -1; h--) {
 						layer = map->GetTileAt(player->pos.w + i - 32, player->pos.h + j - 32, h);
 						if (layer != nullptr) {
-							if (layer->type != TileManager::empty) {
+							if (layer->type != TileManager::tile_empty) {
 								col = layer->color;
 								bg = layer->bg;
 								c = layer->c;
