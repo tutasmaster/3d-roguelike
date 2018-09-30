@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Error.h"
-
 #include "Entity.h"
+#include "GUI.h"
 
 class Message {
 public:
@@ -13,6 +13,9 @@ public:
 class Engine
 {
 public:
+
+	std::vector<std::unique_ptr<GUI>> UI_list;
+	int GUI_ID = -1;
 
 	int x, y;
 	int yPosition;
@@ -38,7 +41,7 @@ public:
 	void update();
 
 
-	void renderMap();
+	void renderMap(int mOffX, int mOffY);
 	void renderMapInverted();
 	void renderMapZoomedOut();
 	void renderMapStandard();

@@ -1,13 +1,21 @@
 #include "engine.hpp"
 
+
 Engine::Engine() 
 {
+	UI_list.push_back(std::make_unique<InventoryGUI>());
+	UI_list.push_back(std::make_unique<DropGUI>());
+	UI_list.push_back(std::make_unique<AnnouncementsGUI>());
+
 	map = new Map(1024, 1024, 64);
 	map->GenerateTerrain(0);
 
 	TCODConsole::initRoot(64, 80, "Roguelike");
 
 	player->ai = std::make_shared<PlayerAi>();
+	player->inv = std::make_shared<Inventory>();
+	player->inv->item_vector.push_back(std::make_pair(itemManager.item_potion, 64));
+	player->inv->item_vector.push_back(std::make_pair(itemManager.item_gold, 128));
 
 	for (int i = 0; i < map->depth; i++) {
 		if (map->GetTileAt(128, 128, i)->type != TileManager::tile_wall) {
@@ -54,23 +62,67 @@ void Engine::init()
 
 void Engine::render()
 {
+	int mapOffsetX = 0, mapOffsetY = 0;
+	if (GUI_ID != -1) {
+		mapOffsetX = UI_list.at(GUI_ID)->mapOffsetX;
+		mapOffsetY = UI_list.at(GUI_ID)->mapOffsetY;
+	}
+
+	TCODConsole::root->setDefaultBackground(TCODColor::black);
+	TCODConsole::root->setDefaultForeground(TCODColor::white);
 	TCODConsole::root->clear();
 
 	if (betterRenderer) {
 		renderMapStandard();
 	}else{
-		renderMap();
+		renderMap(mapOffsetX, mapOffsetY);
 	}
 
-	TCODConsole::root->setCharBackground(32, 32,map->GetTileAt(player->pos.w, player->pos.h, player->pos.d)->bg);
-	TCODConsole::root->setCharForeground(32, 32,TCODColor::gold);
-	TCODConsole::root->setChar(32, 32, player->c);
+	TCODConsole::root->setCharBackground(32 - mapOffsetX, 32 - mapOffsetY,map->GetTileAt(player->pos.w, player->pos.h, player->pos.d)->bg);
+	TCODConsole::root->setCharForeground(32 - mapOffsetX, 32 - mapOffsetY,TCODColor::gold);
+	TCODConsole::root->setChar(32 - mapOffsetX, 32 - mapOffsetY, player->c);
 
 	int j = 0;
 	for (int i = console.size() - 1; i > -1; i--) {
 		j++;
 		TCODConsole::root->setDefaultForeground(console.at(i).col);
-		TCODConsole::root->print(0, 65 + j, console.at(i).msg.c_str());
+		TCODConsole::root->print(1, 64 + j, console.at(i).msg.c_str());
+		if (j > 4)
+			i = -1;
+	}
+
+	TCODConsole::root->setDefaultForeground(TCODColor::yellow);
+	TCODConsole::root->printFrame(0, 0, 64, 64, false);
+
+	TCODConsole::root->setDefaultForeground(TCODColor::white);
+	TCODConsole::root->printFrame(0, 64, 64, 7, false);
+
+	TCODConsole::root->printFrame(0, 71, 64, 9, false);
+
+	TCODConsole::root->print(1, 71, player->name.c_str());
+	TCODConsole::root->print(1, 74, "Head\nTrunk\nArms\nLegs\nFeet");
+
+	int i = 0;
+	for (auto &item : player->inv->item_vector) {
+
+		char str[6];
+		sprintf_s(str, "%03d -", item.second);
+		
+		/*TCODConsole::root->setDefaultBackground(TCODColor::black);
+		TCODConsole::root->setDefaultForeground(TCODColor::white);
+		TCODConsole::root->print(8 + ((i / 5) * 7), 74 + (i % 5), str);*/
+		/*TCODConsole::root->setDefaultBackground(itemManager.GetItemData(item.first)->bgCol);
+		TCODConsole::root->setDefaultForeground(itemManager.GetItemData(item.first)->chCol);
+		TCODConsole::root->print(14 + ((i / 5) * 4), 74 + (i % 5), itemManager.GetItemData(item.first)->shrtnm.c_str());*/
+
+		for (int j = 0; j < item.second; j++) {
+			TCODConsole::root->setCharBackground(8 + ((i / 4)), 74 + (i % 4), itemManager.GetItemData(item.first)->bgCol);
+			TCODConsole::root->setCharForeground(8 + ((i / 4)), 74 + (i % 4), itemManager.GetItemData(item.first)->chCol);
+			TCODConsole::root->setChar(8 + ((i / 4)), 74 + (i % 4), itemManager.GetItemData(item.first)->ch);
+			i++;
+		}
+
+		//i++;
 	}
 
 	if (player->ren != nullptr)
@@ -81,20 +133,30 @@ void Engine::render()
 			e->ren->OnRender(e);
 	}
 
+	if (GUI_ID != -1) {
+		TCODConsole::blit(&UI_list.at(GUI_ID)->console, 0, 0, UI_list.at(GUI_ID)->width, UI_list.at(GUI_ID)->height, TCODConsole::root, UI_list.at(GUI_ID)->x, UI_list.at(GUI_ID)->y, 0.9f, 0.9f);
+	}
+
+
 }
 
 void Engine::update()
 {
-	player->ai->OnTick(player);
-	if(player->ai->hasUpdated){
-		for (auto &e : npcs) {
-			if(e->ai != nullptr){
-				e->ai->OnTick(e);
-			}
-			if (e->phys != nullptr) {
-				e->phys->ApplyPhysics(e);
+	if (GUI_ID == -1) { //MAIN UPDATE
+		player->ai->OnTick(player);
+		if(player->ai->hasUpdated){
+			for (auto &e : npcs) {
+				if(e->ai != nullptr){
+					e->ai->OnTick(e);
+				}
+				if (e->phys != nullptr) {
+					e->phys->ApplyPhysics(e);
+				}
 			}
 		}
+	}
+	else {
+		UI_list.at(GUI_ID)->Update();
 	}
 
 	/*Tile::Type value = map.GetTileAt(x,y,yPosition)->type;

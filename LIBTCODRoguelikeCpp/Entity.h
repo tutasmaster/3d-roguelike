@@ -1,6 +1,7 @@
 #pragma once
 #include "libtcod.h"
 #include "Map.h"
+#include "ItemManager.h"
 
 #include <string>
 #include <memory>
@@ -80,6 +81,15 @@ public:
 	void ApplyPhysics(std::shared_ptr<Entity> entity) override;
 };
 
+class Metabolism {
+	
+};
+
+class Inventory {
+public:
+	std::vector<std::pair<ItemID, unsigned char>> item_vector;
+};
+
 class Entity
 {
 public:
@@ -89,6 +99,8 @@ public:
 	Map::Pos pos;
 
 	std::shared_ptr<Ai> ai;
+	std::shared_ptr<Metabolism> meta;
+	std::shared_ptr<Inventory> inv;
 	std::shared_ptr<Renderer> ren;
 	std::shared_ptr<Physics> phys;
 

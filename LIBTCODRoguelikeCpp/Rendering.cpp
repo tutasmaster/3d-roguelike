@@ -2,17 +2,17 @@
 
 /*Probably the 1 file that's actually commented in the entire code*/
 
-void Engine::renderMap() {
+void Engine::renderMap(int mOffX, int mOffY) {
 
 	/*Let's draw the entire viewable area*/
 
-	for (int j = 0; j < 64; j++) {
-		for (int i = 0; i < 64; i++) {
+	for (int j = 0; j < 62; j++) {
+		for (int i = 0; i < 62; i++) {
 
 			//Let's keep this here so that the code get's smaller.
 			//Essentially just getting the position of the player, and drawing everything 32 tiles to the left of him (assuming he is on the center of a screen 64x64).
 			//This will serve to make the rest of the code more readable
-			Map::Pos currentPosition(player->pos.w + i - 32, player->pos.h + j - 32, player->pos.d);
+			Map::Pos currentPosition(player->pos.w + i + mOffX - 31, player->pos.h + j + mOffY - 31, player->pos.d);
 
 			//Let's start raycasting down, trying to find the first possible tile we can work with
 			//This keeps how far down we went.
@@ -160,9 +160,9 @@ void Engine::renderMap() {
 				depth++;
 
 				//Drawing the blocks now
-				TCODConsole::root->setCharForeground(i, j, tileColor);
-				TCODConsole::root->setCharBackground(i, j, tileBackground);
-				TCODConsole::root->setChar(i, j, tileCharacter);
+				TCODConsole::root->setCharForeground(i+1, j+1, tileColor);
+				TCODConsole::root->setCharBackground(i+1, j+1, tileBackground);
+				TCODConsole::root->setChar(i+1, j+1, tileCharacter);
 
 				//Let's stop the search if we have hit a drawable object
 				if (currentTile->type != TileManager::tile_empty || currentGround->type != TileManager::ground_empty)

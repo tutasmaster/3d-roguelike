@@ -69,6 +69,18 @@ void PlayerAi::OnTick(std::shared_ptr<Entity> entity)
 	else if (isBuildingNB)
 		engine.map->SetTileAt(entity->pos.w, entity->pos.h, entity->pos.d, TileManager::tile_wallNB);
 
+	switch (lastKey.c) {
+	case 'i':
+		engine.GUI_ID = 0;
+		break;
+	case 'd':
+		engine.GUI_ID = 1;
+		break;
+	case 'a':
+		engine.GUI_ID = 2;
+		break;
+	}
+
 	switch (lastKey.vk) {
 	case TCODK_UP:
 		OnMoveSideways(entity,  0, -1);

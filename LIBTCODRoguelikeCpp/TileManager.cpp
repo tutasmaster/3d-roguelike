@@ -133,7 +133,7 @@ TileManager::TileManager() : tiles(), grounds() {
 		stone.c = ' ';
 		stone.bg = TCODColor::white;
 		grounds.push_back(stone); }
-	/*Sand Ground*/ uff{
+	/*Sand Ground*/ {
 		Ground stone;
 		stone.c = '.';
 		stone.bg = TCODColor::darkYellow;

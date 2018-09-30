@@ -123,14 +123,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\tutas\Downloads\libtcod-1.5.1-MSVC\libtcod-1.5.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Home\Documents\LIBTCOD\libtcod-1.5.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\tutas\Downloads\libtcod-1.5.1-MSVC\libtcod-1.5.1\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\Home\Documents\LIBTCOD\libtcod-1.5.1\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libtcod-VS.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -156,6 +156,8 @@
     <ClCompile Include="engine.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="Error.cpp" />
+    <ClCompile Include="GUI.cpp" />
+    <ClCompile Include="ItemManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="Rendering.cpp" />
@@ -165,6 +167,8 @@
     <ClInclude Include="engine.hpp" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="Error.h" />
+    <ClInclude Include="GUI.h" />
+    <ClInclude Include="ItemManager.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="MapGenerators.h" />
     <ClInclude Include="Rendering.h" />
