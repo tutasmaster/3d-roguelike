@@ -79,6 +79,9 @@ void PlayerAi::OnTick(std::shared_ptr<Entity> entity)
 	case 'a':
 		engine.GUI_ID = 2;
 		break;
+	case 'g':
+		entity->inv->PickupItem(entity->pos);
+		break;
 	}
 
 	switch (lastKey.vk) {
@@ -406,4 +409,40 @@ void BoulderPhysics::ApplyPhysics(std::shared_ptr<Entity> entity) {
 	relPosX = (int)relPosX % 1;
 	relPosY = (int)relPosY % 1;
 	relPosZ = (int)relPosZ % 1;
+}
+
+void Inventory::DeleteRemainingItems() {
+	int i = 0;
+	for (auto &it : item_vector) {
+		if (it.second <= 0) {
+			item_vector.erase(item_vector.begin() + i);
+		}
+		i++;
+	}
+}
+
+void Inventory::PickupItem(Map::Pos p) {
+	int i = 0;
+	for (auto &e : engine.npcs) {
+		if (e->isItem) {
+			AddItem(e->itemID);
+			engine.npcs.erase(engine.npcs.begin() + i);
+			break;
+		}
+		i++;
+	}
+}
+
+void Inventory::AddItem(int itemID) {
+	bool hasItem = false;
+	for (auto &i : item_vector) {
+		if (i.first == itemID && i.second < 255){
+			i.second++;
+			hasItem = true;
+		}
+	}
+
+	if (!hasItem) {
+		item_vector.push_back(std::make_pair(itemID, 1));
+	}
 }

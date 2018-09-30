@@ -88,6 +88,9 @@ class Metabolism {
 class Inventory {
 public:
 	std::vector<std::pair<ItemID, unsigned char>> item_vector;
+	void DeleteRemainingItems();
+	void PickupItem(Map::Pos p);
+	void AddItem(int itemID);
 };
 
 class Entity
@@ -108,5 +111,7 @@ public:
 	char c = 'E';
 	TCODColor col = TCODColor::yellow;
 
+	bool isItem = false;
+	int itemID = 0;
 	bool isColliding = true;
 };

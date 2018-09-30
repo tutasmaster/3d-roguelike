@@ -12,10 +12,11 @@ Engine::Engine()
 
 	TCODConsole::initRoot(64, 80, "Roguelike");
 
+	player->c = '@';
 	player->ai = std::make_shared<PlayerAi>();
 	player->inv = std::make_shared<Inventory>();
-	player->inv->item_vector.push_back(std::make_pair(itemManager.item_potion, 64));
-	player->inv->item_vector.push_back(std::make_pair(itemManager.item_gold, 128));
+	player->inv->item_vector.push_back(std::make_pair(itemManager.item_potion, 10));
+	player->inv->item_vector.push_back(std::make_pair(itemManager.item_gold, 10));
 
 	for (int i = 0; i < map->depth; i++) {
 		if (map->GetTileAt(128, 128, i)->type != TileManager::tile_wall) {
@@ -27,12 +28,10 @@ Engine::Engine()
 	}
 
 
-	/*std::shared_ptr<Entity> b = std::make_shared<Entity>();
+	std::shared_ptr<Entity> b = std::make_shared<Entity>();
 	b->pos = player->pos;
-	b->phys = std::make_shared<BoulderPhysics>();
-	//b->phys->speedX++;
-	b->phys->gravity++;
-	npcs.push_back(b);*/
+	b->isColliding = false;
+	npcs.push_back(b);
 
 	Message msg;
 	msg.msg = "Player has entered the world!";

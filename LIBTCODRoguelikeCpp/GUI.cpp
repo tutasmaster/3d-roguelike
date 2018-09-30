@@ -53,6 +53,7 @@ InventoryGUI::InventoryGUI() : GUI(24,62){
 void InventoryGUI::Update() {
 	auto last_key = TCODConsole::root->checkForKeypress(TCOD_KEY_PRESSED);
 
+	int invSize = engine.player->inv->item_vector.size();
 
 	switch (last_key.vk){
 	case TCODK_ESCAPE:
@@ -66,7 +67,9 @@ void InventoryGUI::Update() {
 		break;
 	case TCODK_ENTER:
 	case TCODK_KPENTER:
-		Use(engine.player->inv->item_vector.at(cursorPos).first);
+		if (invSize > 0) {
+			Use(engine.player->inv->item_vector.at(cursorPos).first, cursorPos);
+		}
 		engine.GUI_ID = -1;
 		break;
 	}
@@ -94,9 +97,13 @@ void InventoryGUI::Update() {
 
 		i++;
 	}
+
+	if (invSize == 0) {
+		console.print(1, 3, "Your inventory seems\nto be empty!\nGo grab some loot!");
+	}
 }
 
-void InventoryGUI::Use(int itemID) {
+void InventoryGUI::Use(int itemID, int itemPos) {
 	Message msg;
 	switch (itemID) {
 	case 0:
@@ -128,9 +135,27 @@ DropGUI::DropGUI() : InventoryGUI()
 	menuName = "Drop";
 }
 
-void DropGUI::Use(int itemID){
+void DropGUI::Use(int itemID, int itemPos){
+	if (engine.player->inv->item_vector.at(itemPos).second < 1) {
+		return;
+	}
+	
+	engine.player->inv->item_vector.at(itemPos).second--;
+	engine.player->inv->DeleteRemainingItems();
+
+
 	Message msg;
 	msg.col = TCODColor::gold;
 	msg.msg = "You drop a " + itemManager.GetItemData(itemID)->name + "!";
 	engine.console.push_back(msg);
+
+
+	std::shared_ptr<Entity> item = std::make_shared<Entity>();
+	item->c = itemManager.GetItemData(itemID)->ch;
+	item->col = itemManager.GetItemData(itemID)->chCol;
+	item->isColliding = false;
+	item->pos = engine.player->pos;
+	item->isItem = true;
+	item->itemID = itemID;
+	engine.npcs.push_back(item);
 }

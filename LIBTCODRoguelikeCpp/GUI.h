@@ -27,7 +27,7 @@ public:
 	std::string menuName = "Inventory";
 
 	void Update() override;
-	virtual void Use(int itemID);
+	virtual void Use(int itemID, int itemPos);
 	int cursorPos = 0;
 };
 
@@ -35,7 +35,7 @@ class DropGUI : public InventoryGUI {
 public:
 	DropGUI();
 
-	void Use(int itemID) override;
+	void Use(int itemID, int itemPos) override;
 };
 
 class AnnouncementsGUI : public GUI {
