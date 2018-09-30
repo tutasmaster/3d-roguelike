@@ -60,7 +60,15 @@ void FriendlyAi::OnTick(std::shared_ptr<Entity> entity) {
 
 void PlayerAi::OnTick(std::shared_ptr<Entity> entity)
 {
-	auto lastKey = TCODConsole::root->checkForKeypress(TCOD_KEY_PRESSED);
+	auto lastKey = engine.keyboardInput.pressed ? engine.keyboardInput : TCOD_key_t();
+
+	if (engine.mouseInput.lbutton && engine.mouseInput.cx > 26 && engine.mouseInput.cx < 38 && engine.mouseInput.cy > 26 && engine.mouseInput.cy < 38) {
+		engine.map->SetTileAt(Map::Pos(engine.player->pos.w + engine.mouseInput.cx - 32,engine.player->pos.h + engine.mouseInput.cy - 32, engine.player->pos.d),
+			tileManager.tile_empty);
+
+		engine.map->SetGroundAt(Map::Pos(engine.player->pos.w + engine.mouseInput.cx - 32, engine.player->pos.h + engine.mouseInput.cy - 32, engine.player->pos.d + 1),
+			tileManager.ground_empty);
+	}
 
 	if (isDigging)
 		engine.map->SetTileAt(entity->pos.w, entity->pos.h, entity->pos.d, TileManager::tile_empty);
@@ -193,7 +201,7 @@ WorldBuilderAi::WorldBuilderAi(std::shared_ptr<Entity> entity) {
 }
 
 void WorldBuilderAi::OnTick(std::shared_ptr<Entity> entity) {
-	auto key = TCODConsole::root->checkForKeypress(TCOD_KEY_PRESSED);
+	auto key = engine.keyboardInput.pressed ? engine.keyboardInput : TCOD_key_t();
 	switch (key.vk) {
 
 	case TCODK_F1:

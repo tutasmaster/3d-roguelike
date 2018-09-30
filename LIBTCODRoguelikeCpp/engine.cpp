@@ -141,6 +141,8 @@ void Engine::render()
 
 void Engine::update()
 {
+	TCODSystem::checkForEvent(TCOD_EVENT_KEY | TCOD_EVENT_MOUSE, &keyboardInput, &mouseInput);
+
 	if (GUI_ID == -1) { //MAIN UPDATE
 		player->ai->OnTick(player);
 		if(player->ai->hasUpdated){
@@ -171,8 +173,6 @@ void Engine::update()
 			bottomValue = map.GetTileAt(x,y,yPosition)->type;
 		}
 	}*/
-
-
 }
 
 std::shared_ptr<Entity> Engine::checkEntityAtPos(Map::Pos p) {

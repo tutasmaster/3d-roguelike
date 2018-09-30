@@ -8,7 +8,7 @@ AnnouncementsGUI::AnnouncementsGUI() : GUI(62, 62) {
 }
 
 void AnnouncementsGUI::Update() {
-	auto last_key = TCODConsole::root->checkForKeypress(TCOD_KEY_PRESSED);
+	auto last_key = engine.keyboardInput.pressed ? engine.keyboardInput : TCOD_key_t();
 
 
 	switch (last_key.vk) {
@@ -51,7 +51,7 @@ InventoryGUI::InventoryGUI() : GUI(24,62){
 }
 
 void InventoryGUI::Update() {
-	auto last_key = TCODConsole::root->checkForKeypress(TCOD_KEY_PRESSED);
+	auto last_key = engine.keyboardInput.pressed ? engine.keyboardInput : TCOD_key_t();
 
 	int invSize = engine.player->inv->item_vector.size();
 

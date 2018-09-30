@@ -51,6 +51,9 @@ public:
 
 	int layerSize = 20;
 	bool betterRenderer = false;
+
+	TCOD_key_t keyboardInput;
+	TCOD_mouse_t mouseInput;
 };
 
 extern Engine engine;
