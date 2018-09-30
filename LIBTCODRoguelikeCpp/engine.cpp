@@ -1,8 +1,10 @@
 #include "engine.hpp"
-
+#include "Parser.h"
 
 Engine::Engine() 
 {
+	Parser().Run();
+
 	UI_list.push_back(std::make_unique<InventoryGUI>());
 	UI_list.push_back(std::make_unique<DropGUI>());
 	UI_list.push_back(std::make_unique<AnnouncementsGUI>());
@@ -15,8 +17,10 @@ Engine::Engine()
 	player->c = '@';
 	player->ai = std::make_shared<PlayerAi>();
 	player->inv = std::make_shared<Inventory>();
-	player->inv->item_vector.push_back(std::make_pair(itemManager.item_potion, 10));
-	player->inv->item_vector.push_back(std::make_pair(itemManager.item_gold, 10));
+
+	for (int i = 0; i < itemManager.items.size(); i++) {
+		player->inv->item_vector.push_back(std::make_pair(i, 5));
+	}
 
 	for (int i = 0; i < map->depth; i++) {
 		if (map->GetTileAt(128, 128, i)->type != TileManager::tile_wall) {
@@ -38,7 +42,6 @@ Engine::Engine()
 	msg.col = TCODColor::yellow;
 
 	console.push_back(msg);
-
 }
 
 

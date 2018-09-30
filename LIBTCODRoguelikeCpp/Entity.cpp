@@ -419,6 +419,10 @@ void BoulderPhysics::ApplyPhysics(std::shared_ptr<Entity> entity) {
 	relPosZ = (int)relPosZ % 1;
 }
 
+Inventory::Inventory() {
+
+}
+
 void Inventory::DeleteRemainingItems() {
 	int i = 0;
 	for (auto &it : item_vector) {

@@ -1,0 +1,15 @@
+item_type "potion"{
+	name="Magic Potion"
+	short_name="PTN"
+	character='?'
+	character_color="#FF00FF"
+	background_color="#000000"
+}
+
+item_type "gold"{
+	name="Gold"
+	short_name="GLD"
+	character='O'
+	character_color="#FFFF00"
+	background_color="#000000"
+}

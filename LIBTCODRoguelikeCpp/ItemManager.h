@@ -27,6 +27,8 @@ public:
 	std::vector<Item> items;
 	~ItemManager();
 
+	int total = 0;
+
 	enum itemIDs : unsigned char{
 		item_potion,
 		item_gold

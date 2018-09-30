@@ -87,6 +87,7 @@ class Metabolism {
 
 class Inventory {
 public:
+	Inventory();
 	std::vector<std::pair<ItemID, unsigned char>> item_vector;
 	void DeleteRemainingItems();
 	void PickupItem(Map::Pos p);

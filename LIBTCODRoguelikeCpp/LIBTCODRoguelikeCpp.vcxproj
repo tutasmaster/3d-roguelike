@@ -124,6 +124,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\Home\Documents\LIBTCOD\libtcod-1.7.0-x86-msvc\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -158,6 +159,7 @@
     <ClCompile Include="Error.cpp" />
     <ClCompile Include="GUI.cpp" />
     <ClCompile Include="ItemManager.cpp" />
+    <ClCompile Include="Parser.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="Rendering.cpp" />
@@ -169,6 +171,7 @@
     <ClInclude Include="Error.h" />
     <ClInclude Include="GUI.h" />
     <ClInclude Include="ItemManager.h" />
+    <ClInclude Include="Parser.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="MapGenerators.h" />
     <ClInclude Include="Rendering.h" />
