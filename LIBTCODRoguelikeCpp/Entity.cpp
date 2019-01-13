@@ -1,5 +1,5 @@
 #include "Entity.h"
-
+#include <algorithm>
 #include "engine.hpp"
 
 
@@ -14,17 +14,19 @@ Entity::~Entity()
 
 }
 
-void Ai::Move(std::shared_ptr<Entity> entity, int x, int y, int z)
+bool Ai::Move(std::shared_ptr<Entity> entity, int x, int y, int z)
 {
 	Map::Pos p(x, y, z);
 	if  (engine.map->isPosValid(p) && (!entity->isColliding || engine.map->GetTileAt(p)->type != TileManager::tile_wall) && !engine.checkEntityCollisionAtPos(p)){
 		entity->pos = p;
+		return true;
 	}
+	return false;
 }
 
-void Ai::MoveRelative(std::shared_ptr<Entity> entity, int x, int y, int z)
+bool Ai::MoveRelative(std::shared_ptr<Entity> entity, int x, int y, int z)
 {
-	Move(entity, x + entity->pos.w, y + entity->pos.h, z + entity->pos.d);
+	return Move(entity, x + entity->pos.w, y + entity->pos.h, z + entity->pos.d);
 }
 
 void Ai::Follow(std::shared_ptr<Entity> entity, std::shared_ptr<Entity> follower, int step = 1) {
@@ -90,22 +92,34 @@ void PlayerAi::OnTick(std::shared_ptr<Entity> entity)
 	case 'g':
 		entity->inv->PickupItem(entity->pos);
 		break;
+	/*case 'c':
+		engine.GUI_ID = 3;
+		break;*/
 	}
 
+	/*std::shared_ptr<Effect> f = std::make_shared<FireEffect>();
+	f->pos = entity->pos;*/
 	switch (lastKey.vk) {
+	case TCODK_SPACE:
+		hasUpdated = true;
+		break;
 	case TCODK_UP:
+		//engine.effects.push_back(f);
 		OnMoveSideways(entity,  0, -1);
 		hasUpdated = true;
 		break;
 	case TCODK_DOWN:
+		//engine.effects.push_back(f);
 		OnMoveSideways(entity,  0,  1);
 		hasUpdated = true;
 		break;
 	case TCODK_LEFT:
+		//engine.effects.push_back(f);
 		OnMoveSideways(entity, -1,  0);
 		hasUpdated = true;
 		break;
 	case TCODK_RIGHT:
+		//engine.effects.push_back(f);
 		OnMoveSideways(entity,  1,  0);
 		hasUpdated = true;
 		break;
@@ -130,13 +144,15 @@ void PlayerAi::OnTick(std::shared_ptr<Entity> entity)
 		entity->isColliding = !entity->isColliding;
 		break;*/
 	case TCODK_F1:
-		engine.layerSize--;
+		engineRenderer.layerSize--;
 		break;
 	case TCODK_F2:
-		engine.layerSize++;
+		engineRenderer.layerSize++;
 		break;
 	case TCODK_F3:
-		engine.betterRenderer = !engine.betterRenderer;
+		engine.angle++;
+		if (engine.angle > 3)
+			engine.angle = 0;
 		break;
 	case TCODK_F11:
 		engine.saveMap();
@@ -205,13 +221,15 @@ void WorldBuilderAi::OnTick(std::shared_ptr<Entity> entity) {
 	switch (key.vk) {
 
 	case TCODK_F1:
-		engine.layerSize--;
+		engineRenderer.layerSize--;
 		break;
 	case TCODK_F2:
-		engine.layerSize++;
+		engineRenderer.layerSize++;
 		break;
 	case TCODK_F3:
-		engine.betterRenderer = !engine.betterRenderer;
+		engine.angle++;
+		if (engine.angle > 3)
+			engine.angle = 0;
 		break;
 
 	case TCODK_UP:
@@ -419,6 +437,90 @@ void BoulderPhysics::ApplyPhysics(std::shared_ptr<Entity> entity) {
 	relPosZ = (int)relPosZ % 1;
 }
 
+void CastAi::OnTick(std::shared_ptr<Entity> entity) {
+	bool hasHit = false;
+	switch (dir) {
+	case up:
+		hasHit = MoveRelative(entity, 0, -1, 0);
+		break;
+	case down:
+		hasHit = MoveRelative(entity, 0,  1, 0);
+		break;
+	case left:
+		hasHit = MoveRelative(entity, -1, 0, 0);
+		break;
+	case right:
+		hasHit = MoveRelative(entity,  1, 0, 0);
+		break;
+	}
+
+	if (!hasHit) {
+		Map::Pos p = entity->pos;
+
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.w--;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.h--;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.w++;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.w++;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.h++;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.h++;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.w--;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.w--;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+
+		p = entity->pos;
+		p.d--;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.w--;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.h--;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.w++;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.w++;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.h++;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.h++;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.w--;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.w--;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+
+		p = entity->pos;
+		p.d++;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.w--;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.h--;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.w++;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.w++;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.h++;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.h++;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.w--;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.w--;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+	
+		engine.npcs.erase(std::remove(engine.npcs.begin(), engine.npcs.end(), entity), engine.npcs.end());
+	}
+
+	
+}
+
 Inventory::Inventory() {
 
 }
@@ -456,5 +558,21 @@ void Inventory::AddItem(int itemID) {
 
 	if (!hasItem) {
 		item_vector.push_back(std::make_pair(itemID, 1));
+	}
+}
+
+void PlayerInventory::PickupItem(Map::Pos p) {
+	int i = 0;
+	for (auto &e : engine.npcs) {
+		if (e->isItem) {
+			AddItem(e->itemID);
+			Message pkup;
+			pkup.col = TCODColor::gold;
+			pkup.msg = "You picked up a " + itemManager.GetItemData(e->itemID)->name + " off the ground!";
+			engine.console.push_back(pkup);
+			engine.npcs.erase(engine.npcs.begin() + i);
+			break;
+		}
+		i++;
 	}
 }

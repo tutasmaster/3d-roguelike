@@ -8,6 +8,7 @@ Engine::Engine()
 	UI_list.push_back(std::make_unique<InventoryGUI>());
 	UI_list.push_back(std::make_unique<DropGUI>());
 	UI_list.push_back(std::make_unique<AnnouncementsGUI>());
+	UI_list.push_back(std::make_unique<CastingGUI>());
 
 	map = new Map(1024, 1024, 64);
 	map->GenerateTerrain(0);
@@ -15,8 +16,10 @@ Engine::Engine()
 	TCODConsole::initRoot(64, 80, "Roguelike");
 
 	player->c = '@';
+	/*player->ai = std::make_shared<WorldBuilderAi>(player);
+	player->ren = std::make_shared<WorldBuilderRenderer>();*/
 	player->ai = std::make_shared<PlayerAi>();
-	player->inv = std::make_shared<Inventory>();
+	player->inv = std::make_shared<PlayerInventory>();
 
 	for (int i = 0; i < itemManager.items.size(); i++) {
 		player->inv->item_vector.push_back(std::make_pair(i, 5));
@@ -74,11 +77,16 @@ void Engine::render()
 	TCODConsole::root->setDefaultForeground(TCODColor::white);
 	TCODConsole::root->clear();
 
-	if (betterRenderer) {
-		renderMapStandard();
+	/*if (betterRenderer) {
+		renderMap(mapOffsetX, mapOffsetY,-1,-1);
 	}else{
-		renderMap(mapOffsetX, mapOffsetY);
-	}
+		renderMap(mapOffsetX, mapOffsetY,1,1);
+	}*/
+
+	engineRenderer.renderMap(mapOffsetX, mapOffsetY, angle);
+
+
+	engineRenderer.renderCompass(angle);
 
 	TCODConsole::root->setCharBackground(32 - mapOffsetX, 32 - mapOffsetY,map->GetTileAt(player->pos.w, player->pos.h, player->pos.d)->bg);
 	TCODConsole::root->setCharForeground(32 - mapOffsetX, 32 - mapOffsetY,TCODColor::gold);
@@ -163,6 +171,21 @@ void Engine::update()
 		UI_list.at(GUI_ID)->Update();
 	}
 
+	int i = 0;
+	for (auto &effect : effects) {
+		effect->Update(i);
+		i++;
+	}
+
+	/*i = 0;
+	for (auto &effect : effects) {
+		if(effect->erase){
+			effects.erase(effects.begin() + i);
+			i--;
+		}
+		i++;
+	}*/
+
 	/*Tile::Type value = map.GetTileAt(x,y,yPosition)->type;
 
 	if (value == Tile::Type::tile_wall) {
@@ -199,18 +222,18 @@ bool Engine::checkEntityCollisionAtPos(Map::Pos p) {
 	return false;
 }
 
-void Engine::renderMapStandard() {
+void EngineRenderer::renderMapStandard() {
 	for (int j = 0; j < 64; j++) {
 		for (int i = 0; i < 64; i++) {
-			auto layer = map->GetTileAt(player->pos.w + i - 32, player->pos.h + j - 32, player->pos.d);
+			auto layer = engine.map->GetTileAt(engine.player->pos.w + i - 32, engine.player->pos.h + j - 32, engine.player->pos.d);
 			if(layer != nullptr){
 				TCODColor col = layer->color;
 				TCODColor bg = layer->bg;
 				char c = layer->c;
 				int temp = 2;
 				if(layer->type == TileManager::tile_empty){
-					for (int h = player->pos.d - 1; h > -1; h--) {
-						layer = map->GetTileAt(player->pos.w + i - 32, player->pos.h + j - 32, h);
+					for (int h = engine.player->pos.d - 1; h > -1; h--) {
+						layer = engine.map->GetTileAt(engine.player->pos.w + i - 32, engine.player->pos.h + j - 32, h);
 						if (layer != nullptr) {
 							if (layer->type != TileManager::tile_empty) {
 								col = layer->color;
@@ -233,8 +256,8 @@ void Engine::renderMapStandard() {
 		}
 	}
 
-	for (auto & e : npcs) {
-		if (e->pos.d >= player->pos.d) {
+	for (auto & e : engine.npcs) {
+		if (e->pos.d >= engine.player->pos.d) {
 			TCODColor c = e->col;
 			TCODConsole::root->setCharForeground(e->pos.w, e->pos.h, e->col);
 			TCODConsole::root->setChar(e->pos.w, e->pos.h, e->c);

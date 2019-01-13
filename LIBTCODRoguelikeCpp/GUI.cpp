@@ -1,6 +1,7 @@
 #include "GUI.h"
 #include "engine.hpp"
 #include <string>
+#include <memory>
 
 AnnouncementsGUI::AnnouncementsGUI() : GUI(62, 62) {
 	x = 1; y = 1;
@@ -158,4 +159,70 @@ void DropGUI::Use(int itemID, int itemPos){
 	item->isItem = true;
 	item->itemID = itemID;
 	engine.npcs.push_back(item);
+}
+
+CastingGUI::CastingGUI() : GUI(24,62) {
+	isFullscreen = false;
+	x = 39; y = 1;
+	mapOffsetX = 12;
+}
+
+void CastingGUI::Update() {
+	auto last_key = engine.keyboardInput.pressed ? engine.keyboardInput : TCOD_key_t();
+
+	switch (last_key.vk) {
+	case TCODK_ESCAPE:
+		engine.GUI_ID = -1;
+		break;
+	case TCODK_UP:
+		cursorPos--;
+		break;
+	case TCODK_DOWN:
+		cursorPos++;
+		break;
+	case TCODK_ENTER:
+	case TCODK_KPENTER:
+		Use(cursorPos);
+		engine.GUI_ID = -1;
+		break;
+	}
+
+	if (cursorPos < 0)
+		cursorPos = 0;
+	if (cursorPos > 3)
+		cursorPos = 3;
+
+	console.print(1, 3, cursorPos == 0 ? ">Cast North" : "Cast North");
+	console.print(1, 4, cursorPos == 1 ? ">Cast South" : "Cast South");
+	console.print(1, 5, cursorPos == 2 ? ">Cast West" : "Cast West");
+	console.print(1, 6, cursorPos == 3 ? ">Cast East" : "Cast East");
+}
+
+void CastingGUI::Use(int index) {
+	Entity e = Entity();
+	e.col = TCODColor::white;
+	e.pos = engine.player->pos;
+	switch (index) {
+	case 0:
+		e.c = '|';
+		e.ai = std::make_shared<CastAi>();
+		std::dynamic_pointer_cast<CastAi>(e.ai)->dir = (CastAi::Direction)0;
+		break;
+	case 1:
+		e.c = '|';
+		e.ai = std::make_shared<CastAi>();
+		std::dynamic_pointer_cast<CastAi>(e.ai)->dir = (CastAi::Direction)1;
+		break;
+	case 2:
+		e.c = '-';
+		e.ai = std::make_shared<CastAi>();
+		std::dynamic_pointer_cast<CastAi>(e.ai)->dir = (CastAi::Direction)2;
+		break;
+	case 3:
+		e.c = '-';
+		e.ai = std::make_shared<CastAi>();
+		std::dynamic_pointer_cast<CastAi>(e.ai)->dir = (CastAi::Direction)3;
+		break;
+	}
+	engine.npcs.push_back(std::make_shared<Entity>(e));
 }

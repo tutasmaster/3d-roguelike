@@ -45,3 +45,13 @@ public:
 	int cursorPos = 0;
 	void Update() override;
 };
+
+class CastingGUI : public GUI {
+public:
+	CastingGUI();
+
+	int cursorPos = 0;
+
+	void Update() override;
+	void Use(int index);
+};

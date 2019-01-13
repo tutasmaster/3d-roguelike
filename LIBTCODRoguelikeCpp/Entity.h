@@ -12,8 +12,8 @@ class Ai {
 public:
 	bool hasUpdated = false;
 	virtual void OnTick(std::shared_ptr<Entity> entity) = 0;
-	void Move(std::shared_ptr<Entity> entity, int x, int y, int z);
-	void MoveRelative(std::shared_ptr<Entity> entity, int x, int y, int z);
+	bool Move(std::shared_ptr<Entity> entity, int x, int y, int z);
+	bool MoveRelative(std::shared_ptr<Entity> entity, int x, int y, int z);
 	void Follow(std::shared_ptr<Entity> entity, std::shared_ptr<Entity> follower, int step);
 };
 
@@ -58,6 +58,15 @@ public:
 	TileID block = TileManager::tile_wall;
 };
 
+class CastAi : public Ai {
+public:
+	void OnTick(std::shared_ptr<Entity> entity) override;
+
+	enum Direction : unsigned char {
+		up,down,left,right
+	} dir;
+};
+
 class Renderer {
 public:
 	virtual void OnRender(std::shared_ptr<Entity> entity) = 0;
@@ -90,8 +99,12 @@ public:
 	Inventory();
 	std::vector<std::pair<ItemID, unsigned char>> item_vector;
 	void DeleteRemainingItems();
-	void PickupItem(Map::Pos p);
+	virtual void PickupItem(Map::Pos p);
 	void AddItem(int itemID);
+};
+
+class PlayerInventory : public Inventory{
+	void PickupItem(Map::Pos p) override;
 };
 
 class Entity
