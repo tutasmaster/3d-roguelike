@@ -17,5 +17,11 @@ class ParserListener : public ITCODParserListener {
 	bool parserEndStruct(TCODParser *parser, const TCODParserStruct *str, const char *name) override;
 	void error(const char *msg) ;
 
+	enum ParserType {
+		type_item,
+		type_entity
+	} parserType = type_item;
+
 	Item item;
+	Entity entity;
 };

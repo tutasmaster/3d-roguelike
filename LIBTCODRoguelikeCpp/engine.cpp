@@ -34,11 +34,10 @@ Engine::Engine()
 		}
 	}
 
+	for (auto &e : npcs) {
+		e->pos = player->pos;
+	}
 
-	std::shared_ptr<Entity> b = std::make_shared<Entity>();
-	b->pos = player->pos;
-	b->isColliding = false;
-	npcs.push_back(b);
 
 	Message msg;
 	msg.msg = "Player has entered the world!";
@@ -83,7 +82,7 @@ void Engine::render()
 		renderMap(mapOffsetX, mapOffsetY,1,1);
 	}*/
 
-	engineRenderer.renderMap(mapOffsetX, mapOffsetY, angle);
+	engineRenderer.renderMapOLD(mapOffsetX, mapOffsetY);
 
 
 	engineRenderer.renderCompass(angle);

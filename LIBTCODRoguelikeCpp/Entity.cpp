@@ -60,6 +60,47 @@ void FriendlyAi::OnTick(std::shared_ptr<Entity> entity) {
 	Follow(entity, engine.player);
 }
 
+void WanderingAi::OnTick(std::shared_ptr<Entity> entity) {
+	if (!isFollowing) {
+		int x = entity->pos.w - ((rand() % 10) - 5);
+		int y = entity->pos.h - ((rand() % 10) - 5);
+
+		nextPosX = x;
+		nextPosY = y;
+		
+		isFollowing = true;
+
+		
+	}
+	else {
+
+		int relativeX = nextPosX - entity->pos.w;
+		int relativeY = nextPosY - entity->pos.h;
+
+		if (relativeX > 0)
+			relativeX = 1;
+		else if (relativeX < 0)
+			relativeX = -1;
+		else
+			relativeX = 0;
+
+		if (relativeY > 0)
+			relativeY = 1;
+		else if (relativeY < 0)
+			relativeY = -1;
+		else
+			relativeY = 0;
+
+		if (!OnMoveSideways(entity, relativeX, relativeY)) {
+			isFollowing = false;
+		}
+
+		if (entity->pos.w == nextPosX && entity->pos.h == nextPosY) {
+			isFollowing = false;
+		}
+	}
+}
+
 void PlayerAi::OnTick(std::shared_ptr<Entity> entity)
 {
 	auto lastKey = engine.keyboardInput.pressed ? engine.keyboardInput : TCOD_key_t();
@@ -169,7 +210,7 @@ void PlayerAi::OnTick(std::shared_ptr<Entity> entity)
 
 }
 
-void PlayerAi::OnMoveSideways(std::shared_ptr<Entity> entity, int x, int y)
+bool Ai::OnMoveSideways(std::shared_ptr<Entity> entity, int x, int y)
 {
 	Map::Pos p   (entity->pos.w + x, entity->pos.h + y, entity->pos.d);
 
@@ -195,12 +236,14 @@ void PlayerAi::OnMoveSideways(std::shared_ptr<Entity> entity, int x, int y)
 		else if (tB && tpB && !cB)
 			entity->pos = top;
 		else if (cB && bB && bbB) {
-			Message msg;
+			/*Message msg;
 			msg.msg = "You tried to end it all. But failed.";
 			msg.col = TCODColor::red;
 
-			engine.console.push_back(msg);
+			engine.console.push_back(msg);*/
+			return false;
 		}
+		return true;
 
 	}
 	else {

@@ -14,6 +14,7 @@ public:
 	virtual void OnTick(std::shared_ptr<Entity> entity) = 0;
 	bool Move(std::shared_ptr<Entity> entity, int x, int y, int z);
 	bool MoveRelative(std::shared_ptr<Entity> entity, int x, int y, int z);
+	bool OnMoveSideways(std::shared_ptr<Entity> entity, int x, int y);
 	void Follow(std::shared_ptr<Entity> entity, std::shared_ptr<Entity> follower, int step);
 };
 
@@ -21,10 +22,18 @@ class FriendlyAi : public Ai {
 	void OnTick(std::shared_ptr<Entity> entity) override;
 };
 
+class WanderingAi : public Ai {
+	void OnTick(std::shared_ptr<Entity> entity) override;
+	
+
+
+	bool isFollowing = false;
+	int nextPosX, nextPosY;
+};
+
 class PlayerAi : public Ai {
 public:
 	void OnTick(std::shared_ptr<Entity> entity) override;
-	void OnMoveSideways(std::shared_ptr<Entity> entity, int x, int y);
 	bool isDigging = false;
 	bool isBuilding = false;
 	bool isBuildingNB = false;
@@ -91,7 +100,7 @@ public:
 };
 
 class Metabolism {
-	
+
 };
 
 class Inventory {
