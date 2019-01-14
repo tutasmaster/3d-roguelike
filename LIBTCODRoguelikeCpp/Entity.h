@@ -15,6 +15,7 @@ public:
 	bool Move(std::shared_ptr<Entity> entity, int x, int y, int z);
 	bool MoveRelative(std::shared_ptr<Entity> entity, int x, int y, int z);
 	bool OnMoveSideways(std::shared_ptr<Entity> entity, int x, int y);
+	bool OnMoveSidewaysAtAngle(std::shared_ptr<Entity> entity, int x, int y, int angle);
 	void Follow(std::shared_ptr<Entity> entity, std::shared_ptr<Entity> follower, int step);
 };
 

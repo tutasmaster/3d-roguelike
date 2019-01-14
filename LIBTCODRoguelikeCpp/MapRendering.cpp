@@ -140,7 +140,6 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 							color.getSaturation() - (depth * 0.02),
 							color.getValue() - ((depth) * 0.05));
 
-
 						c = curGround->c;
 
 						drawFullCharacter(width - xDrawPosition, height - yDrawPosition, c, color, bg);
