@@ -59,10 +59,13 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 			int xPosAngleOffset = xAngleOffset;
 			int yPosAngleOffset = yAngleOffset;
 
+			int tempMOffX = mOffX;
+			int tempMOffY = mOffY;
+
 			if (xAngleOffset >= 0 != yAngleOffset >= 0) {
 				std::swap(curI, curJ);
 				//std::swap(xPosAngleOffset, yPosAngleOffset);
-				std::swap(mOffX, mOffY);
+				std::swap(tempMOffX, tempMOffY);
 			}
 
 			int xDrawPosition = curI;
@@ -72,8 +75,8 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 			xAngleOffset = val.at(val.begin() + 0);
 			yAngleOffset = val.at(val.begin() + 1);*/
 
-			int currentXPos = i + (((engine.player->pos.w + (mOffX) - (width / 2)) - xAngleOffsetTrunc)+1);
-			int currentYPos = j + (((engine.player->pos.h + (mOffY) - (height / 2)) - yAngleOffsetTrunc)+1);
+			int currentXPos = i + (((engine.player->pos.w + (tempMOffX * -xAngleOffset) - (width / 2)) - xAngleOffsetTrunc)+1);
+			int currentYPos = j + (((engine.player->pos.h + (tempMOffY * -yAngleOffset) - (height / 2)) - yAngleOffsetTrunc)+1);
 
 			Map::Pos curPosition(currentXPos, currentYPos, engine.player->pos.d + 1);
 
@@ -96,7 +99,34 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 
 				bool hasGround = false;
 
-				if (curGround != NULL) {
+				if (curTile != NULL) {
+					if (curTile->type != TileManager::tile_empty) {
+						TCODColor bg = curTile->bg;
+						TCODColor color = curTile->color;
+
+						bg.setHSV(
+							bg.getHue() - (depth * 0.05),
+							bg.getSaturation() - (depth * 0.02),
+							bg.getValue() - (depth * 0.05));
+						color.setHSV(
+							color.getHue() - (depth * 0.05),
+							color.getSaturation() - (depth * 0.02),
+							color.getValue() - ((depth) * 0.05));
+
+						c = curTile->c;
+
+
+
+						drawFullCharacter(width - xDrawPosition, height - yDrawPosition, c, color, bg);
+						hasGround = true;
+						break;
+					}
+					else {
+						depth++;
+					}
+				}
+
+				if (curGround != NULL && !hasGround) {
 					if (curGround->type != TileManager::ground_empty) {
 						TCODColor bg = curGround->bg;
 						TCODColor color = curGround->color;
@@ -117,31 +147,6 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 
 						hasGround = true;
 						break;
-					}
-				}
-				if (curTile != NULL && !hasGround){
-					if (curTile->type != TileManager::tile_empty) {
-						TCODColor bg = curTile->bg;
-						TCODColor color = curTile->color;
-
-						bg.setHSV(
-							bg.getHue() - (depth * 0.05),
-							bg.getSaturation() - (depth * 0.02),
-							bg.getValue() - (depth * 0.05));
-						color.setHSV(
-							color.getHue() - (depth * 0.05),
-							color.getSaturation() - (depth * 0.02),
-							color.getValue() - ((depth) * 0.05));
-
-						c = curTile->c;
-
-
-
-						drawFullCharacter(width - xDrawPosition, height - yDrawPosition, c, color, bg);
-						break;
-					}
-					else {
-						depth++;
 					}
 				}
 				else {
