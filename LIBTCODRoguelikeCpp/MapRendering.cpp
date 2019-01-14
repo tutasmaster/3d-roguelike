@@ -30,10 +30,7 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 	for (int j = 0; j < height; j++) {
 		for (int i = 0; i < width; i++) {	
 			int xAngleOffset, yAngleOffset;
-
-			/*auto val = GetAngles(angle);
-			xAngleOffset = val.at(val.begin() + 0);
-			yAngleOffset = val.at(val.begin() + 1);*/
+			
 			switch (angle) {
 			case 0: //NORTH
 				xAngleOffset = -1;
@@ -53,8 +50,30 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 				break;
 			}
 
-			int currentXPos = i + (engine.player->pos.w + mOffX - (width / 2));
-			int currentYPos = j + (engine.player->pos.h + mOffY - (height / 2));
+			int xAngleOffsetTrunc = xAngleOffset < 0 ? 0 : 1;
+			int yAngleOffsetTrunc = yAngleOffset < 0 ? 0 : 1;
+
+			int curI = xAngleOffset < 0 ? (width-1) - i : i;
+			int curJ = yAngleOffset < 0 ? (height-1) - j : j;
+
+			int xPosAngleOffset = xAngleOffset;
+			int yPosAngleOffset = yAngleOffset;
+
+			if (xAngleOffset >= 0 != yAngleOffset >= 0) {
+				std::swap(curI, curJ);
+				//std::swap(xPosAngleOffset, yPosAngleOffset);
+				std::swap(mOffX, mOffY);
+			}
+
+			int xDrawPosition = curI;
+			int yDrawPosition = curJ;
+
+			/*auto val = GetAngles(angle);
+			xAngleOffset = val.at(val.begin() + 0);
+			yAngleOffset = val.at(val.begin() + 1);*/
+
+			int currentXPos = i + (((engine.player->pos.w + (mOffX) - (width / 2)) - xAngleOffsetTrunc)+1);
+			int currentYPos = j + (((engine.player->pos.h + (mOffY) - (height / 2)) - yAngleOffsetTrunc)+1);
 
 			Map::Pos curPosition(currentXPos, currentYPos, engine.player->pos.d + 1);
 
@@ -94,7 +113,7 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 
 						c = curGround->c;
 
-						drawFullCharacter(i, j, c, color, bg);
+						drawFullCharacter(width - xDrawPosition, height - yDrawPosition, c, color, bg);
 
 						hasGround = true;
 						break;
@@ -116,7 +135,9 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 
 						c = curTile->c;
 
-						drawFullCharacter(i, j, c, color, bg);
+
+
+						drawFullCharacter(width - xDrawPosition, height - yDrawPosition, c, color, bg);
 						break;
 					}
 					else {
@@ -131,12 +152,58 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 	}																					 
 }																						 
 																						 
-void EngineRenderer::renderMapOLD(int mOffX, int mOffY, int rotateX, int rotateY) {
+void EngineRenderer::renderMapOLD(int mOffX, int mOffY, int angle) {
 
 	/*Let's draw the entire viewable area*/
 
 	for (int j = 0; j < 62; j++) {
 		for (int i = 0; i < 62; i++) {
+			int rotateX, rotateY;
+
+			/*auto val = GetAngles(angle);
+			xAngleOffset = val.at(val.begin() + 0);
+			yAngleOffset = val.at(val.begin() + 1);*/
+			switch (angle) {
+			case 0: //NORTH
+				rotateX = -1;
+				rotateY = -1;
+				break;
+			case 1: //EAST
+				rotateX = 1;
+				rotateY = -1;
+				break;
+			case 2: //SOUTH
+				rotateX = 1;
+				rotateY = 1;
+				break;
+			case 3: //WEST
+				rotateX = -1;
+				rotateY = 1;
+				break;
+			}
+
+			int curI = rotateX < 0 ? 61 - i : i;
+
+			if (rotateX < 0) {
+				curI = 61 - i;
+			}
+			else {
+				curI = i;
+			}
+
+			int curJ = rotateX < 0 ? 61 - j : j;
+
+			if (rotateY < 0) {
+				curJ = 61 - j;
+			}
+			else {
+				curJ = j;
+			}
+			//!A != !B == A ^ B
+			if (rotateX >= 0 != rotateY >= 0) {
+				std::swap(curI, curJ);
+			}
+
 			int rotateXNorm = (int)((rotateX / 2) + 0.5f);
 			int rotateYNorm = (int)((rotateX / 2) + 0.5f);
 			//Let's keep this here so that the code get's smaller.
@@ -169,8 +236,8 @@ void EngineRenderer::renderMapOLD(int mOffX, int mOffY, int rotateX, int rotateY
 			for (auto &e : engine.npcs) {
 				if (e->pos.w == currentPosition.w && e->pos.h == currentPosition.h && e->pos.d == currentPosition.d) {
 					hasNPC = true;
-					TCODConsole::root->setCharForeground(i + 1, j + 1, e->col);
-					TCODConsole::root->setChar(i + 1, j + 1, e->c);
+					TCODConsole::root->setCharForeground(curI + 1, curJ + 1, e->col);
+					TCODConsole::root->setChar(curI + 1, curJ + 1, e->c);
 					break;
 				}
 			}
@@ -334,28 +401,6 @@ void EngineRenderer::renderMapOLD(int mOffX, int mOffY, int rotateX, int rotateY
 
 					//Making sure we are counting the depth looked at.
 					depth++;
-
-					int curI = rotateX < 0 ? 61 - i : i;
-
-					if (rotateX < 0) {
-						curI = 61 - i;
-					}
-					else {
-						curI = i;
-					}
-
-					int curJ = rotateX < 0 ? 61 - j : j;
-
-					if (rotateY < 0) {
-						curJ = 61 - j;
-					}
-					else {
-						curJ = j;
-					}
-					//!A != !B == A ^ B
-					if (rotateX >= 0 != rotateY >= 0) {
-						std::swap(curI, curJ);
-					}
 
 
 					//Drawing the blocks now

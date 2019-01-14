@@ -82,7 +82,7 @@ void Engine::render()
 		renderMap(mapOffsetX, mapOffsetY,1,1);
 	}*/
 
-	engineRenderer.renderMapOLD(mapOffsetX, mapOffsetY);
+	engineRenderer.renderMap(mapOffsetX, mapOffsetY, angle, 62, 62);
 
 
 	engineRenderer.renderCompass(angle);

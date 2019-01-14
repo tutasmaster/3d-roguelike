@@ -15,7 +15,7 @@ static class EngineRenderer
 {
 public:
 	void renderMap(int mOffX, int mOffY, int angle, int width = 62, int height = 62);
-	void renderMapOLD(int mOffX, int mOffY, int rotateX, int rotateY);
+	void renderMapOLD(int mOffX, int mOffY, int angle);
 	void renderMapOLD(int mOffX, int mOffY);
 	void renderMapInverted();
 	void renderMapZoomedOut();

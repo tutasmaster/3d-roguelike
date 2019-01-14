@@ -248,6 +248,7 @@ bool Ai::OnMoveSideways(std::shared_ptr<Entity> entity, int x, int y)
 	}
 	else {
 		entity->pos = p;
+		return true;
 	}
 
 }

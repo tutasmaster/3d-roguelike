@@ -1,0 +1,7 @@
+entity_type "bidoof" {
+	name="Bidoof"
+	character='b'
+	character_color="#ff6e00"
+	ai="wander"
+	//noCollision
+}

@@ -29,10 +29,10 @@ void Parser::Run() {
 		->addFlag("noCollision");
 	
 
-	std::string path = "./DataFiles";
+	std::string path = "./Data Files";
 
 	for (const auto & p : std::experimental::filesystem::directory_iterator(path)) {
-		std::string s = "./DataFiles/" + p.path().filename().string();
+		std::string s = "./Data Files/" + p.path().filename().string();
 		if (!s.find(".dat"))
 			return;
 		parser.run(s.c_str(), new ParserListener());
