@@ -83,9 +83,19 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 			int depth = 0;
 			for (int z = curPosition.d ; z >= 0; z--) {
 				curPosition = curPosition + Map::Pos(xAngleOffset, yAngleOffset, -1);
-								
 				
+				bool hasNPC = false;
 
+				for (auto &e : engine.npcs) {
+					if (e->pos == curPosition) {
+						drawFullCharacter(width - xDrawPosition, height - yDrawPosition, e->c, e->col, TCODColor::black);
+						hasNPC = true;
+						break;
+					}
+				}
+
+				if (hasNPC)
+					break;
 				/*if (depth > 10)
 					break;*/
 
@@ -101,20 +111,34 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 
 				if (curTile != NULL) {
 					if (curTile->type != TileManager::tile_empty) {
+
+						bool topTile = engine.map->GetTileAt(curPosition + Map::Pos(0, 1, 0))->type == TileManager::tile_empty;
+						bool leftTile = engine.map->GetTileAt(curPosition + Map::Pos(1, 0, 0))->type == TileManager::tile_empty;
+						bool forwardTile = engine.map->GetTileAt(curPosition + Map::Pos(0, 0, 1))->type == TileManager::tile_empty;
+
 						TCODColor bg = curTile->bg;
 						TCODColor color = curTile->color;
 
 						bg.setHSV(
 							bg.getHue() - (depth * 0.05),
 							bg.getSaturation() - (depth * 0.02),
-							bg.getValue() - (depth * 0.05));
+							sqrt((bg.getValue() * bg.getValue()) / (depth)));
 						color.setHSV(
 							color.getHue() - (depth * 0.05),
 							color.getSaturation() - (depth * 0.02),
 							color.getValue() - ((depth) * 0.05));
 
-						c = curTile->c;
-
+						if (topTile && leftTile && forwardTile) {
+							c = '\\';
+							color = bg;
+							color.setHSV(
+								color.getHue() - (depth * 0.05),
+								color.getSaturation() - (depth * 0.02),
+								((color.getValue() + 0.2f) - ((depth) * 0.02)));
+						}
+						else {
+							c = curTile->c;
+						}
 
 
 						drawFullCharacter(width - xDrawPosition, height - yDrawPosition, c, color, bg);
@@ -134,13 +158,16 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 						bg.setHSV(
 							bg.getHue() - (depth * 0.05),
 							bg.getSaturation() - (depth * 0.02),
-							bg.getValue() - (depth * 0.05));
-						color.setHSV(
+							sqrt((bg.getValue() * bg.getValue()) / (depth)));
+						/*color.setHSV(
 							color.getHue() - (depth * 0.05),
 							color.getSaturation() - (depth * 0.02),
-							color.getValue() - ((depth) * 0.05));
+							(color.getValue()) - ((depth) * 0.05));*/
+
+						color = TCODColor::lerp(bg, color, 0.25f);
 
 						c = curGround->c;
+						//c = ' ';
 
 						drawFullCharacter(width - xDrawPosition, height - yDrawPosition, c, color, bg);
 
