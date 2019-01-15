@@ -133,7 +133,7 @@ void GeneratePerlinNoiseMap(Map * map) {
 
 	for (int j = 0; j < map->height; j++) {
 		for (int i = 0; i < map->width; i++) {
-			for (int h = 0; h < 20; h++) {
+			for (int h = 0; h < 30; h++) {
 				if (map->GetTileAt(i, j, h) != nullptr && map->GetTileAt(i, j, h)->type == TileManager::tile_empty) {
 					map->SetTileAt(i, j, h, TileManager::tile_water);
 				}

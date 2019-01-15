@@ -29,8 +29,9 @@ std::vector<int> Engine::GetAngles(char angle) {
 void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int height) {
 	for (int j = 0; j < height; j++) {
 		for (int i = 0; i < width; i++) {	
+
 			int xAngleOffset, yAngleOffset;
-			
+
 			switch (angle) {
 			case 0: //NORTH
 				xAngleOffset = -1;
@@ -82,8 +83,16 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 
 			bool hasCharacter = false;
 
+			float totalHue = 0.0f;
+			float totalSat = 0.0f;
+			float totalVal = 0.0f;
+
+			int totalBlocks = 0;
+
 			int depth = 0;
 			for (int z = curPosition.d ; z >= 0; z--) {
+				bool stopLoop = false;
+				
 				curPosition = curPosition + Map::Pos(xAngleOffset, yAngleOffset, -1);
 				
 				bool hasNPC = false;
@@ -113,50 +122,43 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 				bool hasGround = false;
 
 				if (curTile != NULL) {
-					if (curTile->type != TileManager::tile_empty) {
+					if (curTile->type == Tile::wall) {
 
-						
 
-						bool topTile = engine.map->GetTileAt(curPosition + Map::Pos(0, 0, 1))->type == TileManager::tile_empty && curPosition.h != engine.player->pos.h;
-						bool leftTile = engine.map->GetTileAt(curPosition + Map::Pos(-xAngleOffset, 0, 0))->type == TileManager::tile_empty;
-						bool forwardTile = engine.map->GetTileAt(curPosition + Map::Pos(0, -yAngleOffset, 0))->type == TileManager::tile_empty;
+						bool topTile = engine.map->GetTileAt(curPosition + Map::Pos(0, 0, 1))->type != Tile::wall && curPosition.d != engine.player->pos.d;
+						bool leftTile = engine.map->GetTileAt(curPosition + Map::Pos(-xAngleOffset, 0, 0))->type != Tile::wall;
+						bool forwardTile = engine.map->GetTileAt(curPosition + Map::Pos(0, -yAngleOffset, 0))->type != Tile::wall;
 
-						TCODColor bg = curTile->bg;
-						TCODColor color = curTile->color;
-
-						bg.setHSV(
-							bg.getHue() - (depth * 0.05),
-							bg.getSaturation() - (depth * 0.02),
-							bg.getValue() - (depth * 0.05));
-						color.setHSV(
-							color.getHue() - (depth * 0.05),
-							color.getSaturation() - (depth * 0.02),
-							color.getValue() - ((depth) * 0.05));
+						bg = curTile->bg;
+						color = curTile->color;
 
 						if (topTile && leftTile && forwardTile) {
 							c = '\\';
 							color = bg;
-							color.setHSV(
-								color.getHue() - (depth * 0.05),
-								color.getSaturation() - (depth * 0.02),
-								((color.getValue() + 0.2f) - ((depth) * 0.02)));
 						}
 						else if (topTile && !leftTile && !forwardTile) {
 							c = '\\';
 							color = bg;
-							color.setHSV(
-								color.getHue() - (depth * 0.05),
-								color.getSaturation() - (depth * 0.02),
-								((color.getValue() - 0.1f) - ((depth) * 0.02)));
 						}
 						else {
 							c = curTile->c;
 						}
 
-
-						drawFullCharacter(width - xDrawPosition, height - yDrawPosition, c, color, bg);
 						hasGround = true;
-						break;
+						stopLoop = true;
+					}
+					else if (curTile->type == Tile::liquid) {
+
+						bg = curTile->bg;
+						color = curTile->color;
+						
+						//drawFullCharacter(width - xDrawPosition, height - yDrawPosition, c, color, bg);
+						//hasGround = true;
+						totalBlocks++;
+						totalHue += bg.getHue();
+						totalSat += bg.getSaturation();
+						totalVal += bg.getValue();
+
 					}
 					else {
 						depth++;
@@ -164,36 +166,34 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 				}
 
 				if (curGround != NULL && !hasGround) {
-					if (curGround->type != TileManager::ground_empty) {
-						TCODColor bg = curGround->bg;
-						TCODColor color = curGround->color;
-
-						bg.setHSV(
-							bg.getHue() - (depth * 0.05),
-							bg.getSaturation() - (depth * 0.02),
-							bg.getValue() - (depth * 0.05));
-
-						//sqrt((bgValue) / (depth + 1))
-
-						/*color.setHSV(
-							color.getHue() - (depth * 0.05),
-							color.getSaturation() - (depth * 0.02),
-							(color.getValue()) - ((depth) * 0.05));*/
-
-						color = TCODColor::lerp(bg, color, 0.25f);
-
+					if (curGround->type != Ground::empty) {
+						bg = curGround->bg;
+						color = curGround->color;
+						color = TCODColor::lerp(bg, color, 0.75f);
 						c = curGround->c;
-						//c = ' ';
-
-						drawFullCharacter(width - xDrawPosition, height - yDrawPosition, c, color, bg);
-
-						hasGround = true;
-						break;
+						stopLoop = true;
 					}
 				}
-				else {
+				else if( curGround== NULL){
+					
+					stopLoop = true;
+				}	
+				depth++;
+
+				bg.setHSV(
+					((bg.getHue() + totalHue) / (totalBlocks + 1)) - (depth * 0.05),
+					((bg.getSaturation() + totalSat) / (totalBlocks + 1)) - (depth * 0.02),
+					((bg.getValue() + totalVal) / (totalBlocks + 1)) - (depth * 0.05));
+
+				color.setHSV(
+					color.getHue() - (depth * 0.05),
+					color.getSaturation() - (depth * 0.02),
+					color.getValue() - ((depth) * 0.05));
+
+				drawFullCharacter(width - xDrawPosition, height - yDrawPosition, c, color, bg);
+
+				if(stopLoop)
 					break;
-				}				
 			}
 		}																				 
 	}																					 
