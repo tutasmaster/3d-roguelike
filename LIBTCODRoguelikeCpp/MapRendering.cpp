@@ -87,6 +87,10 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 			float totalSat = 0.0f;
 			float totalVal = 0.0f;
 
+			float totalCharHue = 0.0f;
+			float totalCharSat = 0.0f;
+			float totalCharVal = 0.0f;
+
 			int totalBlocks = 0;
 
 			int depth = 0;
@@ -125,20 +129,40 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 					if (curTile->type == Tile::wall) {
 
 
-						bool topTile = engine.map->GetTileAt(curPosition + Map::Pos(0, 0, 1))->type != Tile::wall && curPosition.d != engine.player->pos.d;
+						bool topTile = engine.map->GetTileAt(curPosition + Map::Pos(0, 0, 1))->type != Tile::wall;
 						bool leftTile = engine.map->GetTileAt(curPosition + Map::Pos(-xAngleOffset, 0, 0))->type != Tile::wall;
 						bool forwardTile = engine.map->GetTileAt(curPosition + Map::Pos(0, -yAngleOffset, 0))->type != Tile::wall;
+						bool rightTile = engine.map->GetTileAt(curPosition + Map::Pos(xAngleOffset, 0, 0))->type != Tile::wall;
+						bool backwardTile = engine.map->GetTileAt(curPosition + Map::Pos(0, yAngleOffset, 0))->type != Tile::wall;
 
 						bg = curTile->bg;
 						color = curTile->color;
 
-						if (topTile && leftTile && forwardTile) {
+						/*if (!topTile && leftTile && forwardTile && curPosition.d != engine.player->pos.d) {
 							c = '\\';
 							color = bg;
+							color.setValue(color.getValue() * 1.3f);
 						}
-						else if (topTile && !leftTile && !forwardTile) {
+						else if (!topTile && !leftTile && !forwardTile && curPosition.d != engine.player->pos.d) {
 							c = '\\';
 							color = bg;
+							color.setValue(color.getValue() * 0.7f);
+						}*/
+						if (curPosition.d != engine.player->pos.d && (!topTile && leftTile && forwardTile && !rightTile && !backwardTile) ){
+							c = '\\';
+							color.setValue(color.getValue() * 1.3f);
+						}
+						else if (curPosition.d != engine.player->pos.d && (!topTile && !leftTile && !forwardTile && rightTile && backwardTile)) {
+							c = '\\';
+							color.setValue(color.getValue() * 1.3f);
+						}
+						else if (curPosition.d != engine.player->pos.d && (!topTile && !leftTile && forwardTile && rightTile && !backwardTile) ){
+							c = '\\';
+							color.setValue(color.getValue() * 1.3f);
+						}
+						else if (curPosition.d != engine.player->pos.d && (!topTile && leftTile && !forwardTile && !rightTile && backwardTile)) {
+							c = '\\';
+							color.setValue(color.getValue() * 1.3f);
 						}
 						else {
 							c = curTile->c;
@@ -158,6 +182,10 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 						totalHue += bg.getHue();
 						totalSat += bg.getSaturation();
 						totalVal += bg.getValue();
+
+						totalCharHue += color.getHue();
+						totalCharSat += color.getSaturation();
+						totalCharVal += color.getValue();
 
 					}
 					else {
@@ -180,19 +208,29 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 				}	
 				depth++;
 
+				float curBGHue = ((bg.getHue() + totalHue) / (totalBlocks + 1));
+				float curBGSat = ((bg.getSaturation() + totalSat) / (totalBlocks + 1));
+				float curBGVal = ((bg.getValue() + totalVal) / (totalBlocks + 1));
+
+				float curCLHue = ((color.getHue() + totalCharHue) / (totalBlocks + 1));
+				float curCLSat = ((color.getSaturation() + totalCharSat) / (totalBlocks + 1));
+				float curCLVal = ((color.getValue() + totalCharVal) / (totalBlocks + 1));
+
 				bg.setHSV(
-					((bg.getHue() + totalHue) / (totalBlocks + 1)) - (depth * 0.05),
-					((bg.getSaturation() + totalSat) / (totalBlocks + 1)) - (depth * 0.02),
-					((bg.getValue() + totalVal) / (totalBlocks + 1)) - (depth * 0.05));
+					curBGHue,
+					curBGSat,
+					sqrt(curBGVal / (depth * 0.9))
+				);
 
 				color.setHSV(
-					color.getHue() - (depth * 0.05),
-					color.getSaturation() - (depth * 0.02),
-					color.getValue() - ((depth) * 0.05));
+					curCLHue,
+					curCLSat,
+					sqrt(curCLVal / (depth * 0.9))
+				);
 
 				drawFullCharacter(width - xDrawPosition, height - yDrawPosition, c, color, bg);
 
-				if(stopLoop)
+				if (stopLoop)
 					break;
 			}
 		}																				 

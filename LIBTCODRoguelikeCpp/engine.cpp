@@ -16,9 +16,9 @@ Engine::Engine()
 	TCODConsole::initRoot(64, 80, "Roguelike");
 
 	player->c = '@';
-	/*player->ai = std::make_shared<WorldBuilderAi>(player);
-	player->ren = std::make_shared<WorldBuilderRenderer>();*/
-	player->ai = std::make_shared<PlayerAi>();
+	player->ai = std::make_shared<WorldBuilderAi>(player);
+	player->ren = std::make_shared<WorldBuilderRenderer>();
+	//player->ai = std::make_shared<PlayerAi>();
 	player->inv = std::make_shared<PlayerInventory>();
 
 	for (int i = 0; i < itemManager.items.size(); i++) {
