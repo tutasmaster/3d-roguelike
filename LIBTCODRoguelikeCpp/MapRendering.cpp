@@ -80,6 +80,8 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 
 			Map::Pos curPosition(currentXPos, currentYPos, engine.player->pos.d + 1);
 
+			bool hasCharacter = false;
+
 			int depth = 0;
 			for (int z = curPosition.d ; z >= 0; z--) {
 				curPosition = curPosition + Map::Pos(xAngleOffset, yAngleOffset, -1);
@@ -89,6 +91,7 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 				for (auto &e : engine.npcs) {
 					if (e->pos == curPosition) {
 						drawFullCharacter(width - xDrawPosition, height - yDrawPosition, e->c, e->col, TCODColor::black);
+						hasCharacter = true;
 						hasNPC = true;
 						break;
 					}
@@ -114,7 +117,7 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 
 						
 
-						bool topTile = engine.map->GetTileAt(curPosition + Map::Pos(0, 0, 1))->type == TileManager::tile_empty;
+						bool topTile = engine.map->GetTileAt(curPosition + Map::Pos(0, 0, 1))->type == TileManager::tile_empty && curPosition.h != engine.player->pos.h;
 						bool leftTile = engine.map->GetTileAt(curPosition + Map::Pos(-xAngleOffset, 0, 0))->type == TileManager::tile_empty;
 						bool forwardTile = engine.map->GetTileAt(curPosition + Map::Pos(0, -yAngleOffset, 0))->type == TileManager::tile_empty;
 
@@ -124,7 +127,7 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 						bg.setHSV(
 							bg.getHue() - (depth * 0.05),
 							bg.getSaturation() - (depth * 0.02),
-							sqrt((bg.getValue() * bg.getValue()) / (depth)));
+							bg.getValue() - (depth * 0.05));
 						color.setHSV(
 							color.getHue() - (depth * 0.05),
 							color.getSaturation() - (depth * 0.02),
@@ -168,7 +171,10 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 						bg.setHSV(
 							bg.getHue() - (depth * 0.05),
 							bg.getSaturation() - (depth * 0.02),
-							sqrt((bg.getValue() * bg.getValue()) / (depth)));
+							bg.getValue() - (depth * 0.05));
+
+						//sqrt((bgValue) / (depth + 1))
+
 						/*color.setHSV(
 							color.getHue() - (depth * 0.05),
 							color.getSaturation() - (depth * 0.02),
