@@ -94,18 +94,22 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 			int totalBlocks = 0;
 
 			int depth = 0;
-			for (int z = curPosition.d ; z >= 0; z--) {
+
+			std::shared_ptr<Entity> foundNPC = nullptr;
+			for (int z = curPosition.d; z >= 0; z--) {
 				bool stopLoop = false;
-				
+
 				curPosition = curPosition + Map::Pos(xAngleOffset, yAngleOffset, -1);
-				
+
 				bool hasNPC = false;
 
 				for (auto &e : engine.npcs) {
 					if (e->pos == curPosition) {
-						drawFullCharacter(width - xDrawPosition, height - yDrawPosition, e->c, e->col, TCODColor::black);
-						hasCharacter = true;
-						hasNPC = true;
+						foundNPC = e;
+
+						//drawFullCharacter(width - xDrawPosition, height - yDrawPosition, e->c, col, TCODColor::black);
+						/*hasCharacter = true;
+						hasNPC = true;*/
 						break;
 					}
 				}
@@ -129,17 +133,17 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 					if (curTile->type == Tile::wall) {
 
 
-						bool topTile = engine.map->GetTileAt(curPosition + Map::Pos(0,0,1)) != nullptr && 
+						bool topTile = engine.map->GetTileAt(curPosition + Map::Pos(0, 0, 1)) != nullptr &&
 							engine.map->GetTileAt(curPosition + Map::Pos(0, 0, 1))->type != Tile::wall &&
-							engine.map->GetGroundAt(curPosition + Map::Pos(0, 0, 1)) != nullptr && 
+							engine.map->GetGroundAt(curPosition + Map::Pos(0, 0, 1)) != nullptr &&
 							engine.map->GetGroundAt(curPosition + Map::Pos(0, 0, 1))->type != Ground::wall;
-						bool leftTile = engine.map->GetTileAt(curPosition + Map::Pos(-xAngleOffset, 0, 0)) != nullptr && 
+						bool leftTile = engine.map->GetTileAt(curPosition + Map::Pos(-xAngleOffset, 0, 0)) != nullptr &&
 							engine.map->GetTileAt(curPosition + Map::Pos(-xAngleOffset, 0, 0))->type != Tile::wall;
-						bool forwardTile = engine.map->GetTileAt(curPosition + Map::Pos(0, -yAngleOffset, 0)) != nullptr && 
+						bool forwardTile = engine.map->GetTileAt(curPosition + Map::Pos(0, -yAngleOffset, 0)) != nullptr &&
 							engine.map->GetTileAt(curPosition + Map::Pos(0, -yAngleOffset, 0))->type != Tile::wall;
-						bool rightTile = engine.map->GetTileAt(curPosition + Map::Pos(xAngleOffset, 0, 0)) != nullptr && 
+						bool rightTile = engine.map->GetTileAt(curPosition + Map::Pos(xAngleOffset, 0, 0)) != nullptr &&
 							engine.map->GetTileAt(curPosition + Map::Pos(xAngleOffset, 0, 0))->type != Tile::wall;
-						bool backwardTile = engine.map->GetTileAt(curPosition + Map::Pos(0, yAngleOffset, 0)) != nullptr && 
+						bool backwardTile = engine.map->GetTileAt(curPosition + Map::Pos(0, yAngleOffset, 0)) != nullptr &&
 							engine.map->GetTileAt(curPosition + Map::Pos(0, yAngleOffset, 0))->type != Tile::wall;
 
 						bg = curTile->bg;
@@ -155,7 +159,7 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 							color = bg;
 							color.setValue(color.getValue() * 0.7f);
 						}*/
-						if (curPosition.d != engine.player->pos.d && (!topTile && leftTile && forwardTile && !rightTile && !backwardTile) ){
+						if (curPosition.d != engine.player->pos.d && (!topTile && leftTile && forwardTile && !rightTile && !backwardTile)) {
 							c = '\\';
 							color.setValue(color.getValue() * 1.3f);
 						}
@@ -163,7 +167,7 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 							c = '\\';
 							color.setValue(color.getValue() * 1.3f);
 						}
-						else if (curPosition.d != engine.player->pos.d && (!topTile && !leftTile && forwardTile && rightTile && !backwardTile) ){
+						else if (curPosition.d != engine.player->pos.d && (!topTile && !leftTile && forwardTile && rightTile && !backwardTile)) {
 							c = '\\';
 							color.setValue(color.getValue() * 1.3f);
 						}
@@ -182,7 +186,7 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 
 						bg = curTile->bg;
 						color = curTile->color;
-						
+
 						//drawFullCharacter(width - xDrawPosition, height - yDrawPosition, c, color, bg);
 						//hasGround = true;
 						totalBlocks++;
@@ -209,10 +213,10 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 						stopLoop = true;
 					}
 				}
-				else if( curGround== NULL){
-					
+				else if (curGround == NULL) {
+
 					stopLoop = true;
-				}	
+				}
 				depth++;
 
 				float curBGHue = ((bg.getHue() + totalHue) / (totalBlocks + 1));
@@ -228,6 +232,14 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 					curBGSat,
 					sqrt(curBGVal / (depth * 0.9))
 				);
+
+				if (foundNPC != nullptr){
+					curCLHue = foundNPC->col.getHue();
+					curCLSat = foundNPC->col.getSaturation();
+					curCLVal = foundNPC->col.getValue();
+
+					c = foundNPC->c;
+				}
 
 				color.setHSV(
 					curCLHue,
