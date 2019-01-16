@@ -280,6 +280,7 @@ WorldBuilderAi::WorldBuilderAi(std::shared_ptr<Entity> entity) {
 }
 
 void WorldBuilderAi::OnTick(std::shared_ptr<Entity> entity) {
+	
 	auto key = engine.keyboardInput.pressed ? engine.keyboardInput : TCOD_key_t();
 	switch (key.vk) {
 
@@ -336,6 +337,12 @@ void WorldBuilderAi::OnTick(std::shared_ptr<Entity> entity) {
 				entity->c = 'X';
 			}
 		}
+		break;
+	case TCODK_F11:
+		engine.saveMap();
+		break;
+	case TCODK_F12:
+		engine.loadMap();
 		break;
 	}
 

@@ -10,7 +10,7 @@ Engine::Engine()
 	UI_list.push_back(std::make_unique<AnnouncementsGUI>());
 	UI_list.push_back(std::make_unique<CastingGUI>());
 
-	map = new Map(1024, 1024, 64);
+	map = new Map(256, 256, 64);
 	map->GenerateTerrain(0);
 
 	TCODConsole::initRoot(64, 80, "Roguelike");
@@ -274,6 +274,8 @@ void Engine::saveMap(const char * name) {
 		for (int i = 0; i < map->width; i++) {
 			for (int h = 0; h < map->depth; h++) {
 				zip.putInt(map->arr[(i)+((j)*map->width) + ((h)*map->height * map->width)]);
+				zip.putInt(map->groundArr[(i)+((j)*map->width) + ((h)*map->height * map->width)]);
+				
 			}
 		}
 	}
@@ -287,11 +289,13 @@ void Engine::loadMap(const char * name) {
 		delete map;
 		map = new Map(zip.getInt(), zip.getInt(), zip.getInt());
 		//map = Map(zip.getInt(), zip.getInt(), zip.getInt());
+		/*zip.getInt(); zip.getInt(); zip.getInt();*/
 		
 		for (int j = 0; j < map->height; j++) {
 			for (int i = 0; i < map->width; i++) {
 				for (int h = 0; h < map->depth; h++) {
 					map->arr[(i)+((j)*map->width) + ((h)*map->height * map->width)] = zip.getInt();
+					map->groundArr[(i)+((j)*map->width) + ((h)*map->height * map->width)] = zip.getInt();
 				}
 			}
 		}

@@ -27,7 +27,7 @@ TileManager::TileManager() : tiles(), grounds() {
 	Tile dirt;
 	dirt.c = ' ';
 	dirt.bg = TCODColor::darkOrange;
-	dirt.color = TCODColor::yellow;
+	dirt.color = TCODColor::darkOrange;
 	dirt.type = dirt.wall;
 	dirt.isBlocking = true;
 	tiles.push_back(dirt); 
@@ -35,7 +35,7 @@ TileManager::TileManager() : tiles(), grounds() {
 	Tile grass;
 	grass.c = ' ';
 	grass.bg = TCODColor::darkerGreen;
-	grass.color = TCODColor::white;
+	grass.color = TCODColor::darkerGreen;
 	grass.type = grass.wall;
 	grass.isBlocking = true;
 	tiles.push_back(grass);
@@ -52,7 +52,7 @@ TileManager::TileManager() : tiles(), grounds() {
 	Tile water;
 	water.c = ' ';
 	water.bg = TCODColor::blue;
-	water.color = TCODColor::white;
+	water.color = TCODColor::blue;
 	water.type = water.liquid;
 	water.isBlocking = false;
 	tiles.push_back(water); 
@@ -76,7 +76,7 @@ TileManager::TileManager() : tiles(), grounds() {
 	Tile sand;
 	sand.c = ' ';
 	sand.bg = TCODColor::darkerYellow;
-	sand.color = TCODColor::white;
+	sand.color = TCODColor::darkerYellow;
 	sand.type = sand.wall;
 	sand.isBlocking = false;
 	tiles.push_back(sand); 

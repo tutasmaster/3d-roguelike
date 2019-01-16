@@ -5,6 +5,10 @@
 #include "GUI.h"
 #include "Effect.h"
 
+#include <iomanip>
+#include <ctime>
+#include <sstream>
+
 class Message {
 public:
 	std::string msg = "xD";

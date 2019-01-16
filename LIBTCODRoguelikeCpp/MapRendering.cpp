@@ -129,11 +129,18 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 					if (curTile->type == Tile::wall) {
 
 
-						bool topTile = engine.map->GetTileAt(curPosition + Map::Pos(0, 0, 1))->type != Tile::wall;
-						bool leftTile = engine.map->GetTileAt(curPosition + Map::Pos(-xAngleOffset, 0, 0))->type != Tile::wall;
-						bool forwardTile = engine.map->GetTileAt(curPosition + Map::Pos(0, -yAngleOffset, 0))->type != Tile::wall;
-						bool rightTile = engine.map->GetTileAt(curPosition + Map::Pos(xAngleOffset, 0, 0))->type != Tile::wall;
-						bool backwardTile = engine.map->GetTileAt(curPosition + Map::Pos(0, yAngleOffset, 0))->type != Tile::wall;
+						bool topTile = engine.map->GetTileAt(curPosition + Map::Pos(0,0,1)) != nullptr && 
+							engine.map->GetTileAt(curPosition + Map::Pos(0, 0, 1))->type != Tile::wall &&
+							engine.map->GetGroundAt(curPosition + Map::Pos(0, 0, 1)) != nullptr && 
+							engine.map->GetGroundAt(curPosition + Map::Pos(0, 0, 1))->type != Ground::wall;
+						bool leftTile = engine.map->GetTileAt(curPosition + Map::Pos(-xAngleOffset, 0, 0)) != nullptr && 
+							engine.map->GetTileAt(curPosition + Map::Pos(-xAngleOffset, 0, 0))->type != Tile::wall;
+						bool forwardTile = engine.map->GetTileAt(curPosition + Map::Pos(0, -yAngleOffset, 0)) != nullptr && 
+							engine.map->GetTileAt(curPosition + Map::Pos(0, -yAngleOffset, 0))->type != Tile::wall;
+						bool rightTile = engine.map->GetTileAt(curPosition + Map::Pos(xAngleOffset, 0, 0)) != nullptr && 
+							engine.map->GetTileAt(curPosition + Map::Pos(xAngleOffset, 0, 0))->type != Tile::wall;
+						bool backwardTile = engine.map->GetTileAt(curPosition + Map::Pos(0, yAngleOffset, 0)) != nullptr && 
+							engine.map->GetTileAt(curPosition + Map::Pos(0, yAngleOffset, 0))->type != Tile::wall;
 
 						bg = curTile->bg;
 						color = curTile->color;
