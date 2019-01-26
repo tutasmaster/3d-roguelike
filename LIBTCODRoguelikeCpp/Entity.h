@@ -38,6 +38,7 @@ public:
 	bool isDigging = false;
 	bool isBuilding = false;
 	bool isBuildingNB = false;
+	bool isAttacking = false;
 };
 
 class WorldBuilderAi : public Ai {
@@ -101,7 +102,24 @@ public:
 };
 
 class Metabolism {
+public:
+	std::shared_ptr<Entity> entity;
 
+	Metabolism(std::shared_ptr<Entity> entity);
+
+	int HP = 100;
+	int DEF = 2;
+
+	int DoDamage(int ATK);
+	void Die();
+
+	bool isDead = false;
+};
+
+class Weapon {
+public:
+	int ATK = 50;
+	std::string name = "Sword";
 };
 
 class Inventory {
@@ -130,6 +148,7 @@ public:
 	std::shared_ptr<Inventory> inv;
 	std::shared_ptr<Renderer> ren;
 	std::shared_ptr<Physics> phys;
+	std::shared_ptr<Weapon> wep;
 
 	std::string name = "Entity";
 	char c = 'E';

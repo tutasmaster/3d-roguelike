@@ -13,7 +13,8 @@ public:
 	TCODColor chCol = TCODColor::white;
 
 	unsigned char maxStack = 100;
-
+	int ATK = 0;
+	bool isAttackItem = false;
 	
 };
 

@@ -140,6 +140,22 @@ void GeneratePerlinNoiseMap(Map * map) {
 			}
 		}
 	}
+
+	r = tcodRand->getFloat(0, 1);
+
+	for (int j = 0; j < map->height; j++) {
+		for (int i = 0; i < map->width; i++) {
+			float pBiome[2] = { (i * 0.22f) + r * 100, (j * 0.22f) + r * 100 };
+			float val = noise.get(pBiome, TCOD_NOISE_PERLIN);
+
+			if(val < 0.1){
+				map->SetTileAt(i, j, 60 + ((val - 0.5) * 4), TileManager::tile_cloud);
+				map->SetTileAt(i, j, 60 + ((val - 0.5) * 3), TileManager::tile_cloud);
+				map->SetTileAt(i, j, 60 + ((val - 0.5) * 2), TileManager::tile_cloud);
+				map->SetTileAt(i, j, 60 + ((val - 0.5) * 1), TileManager::tile_cloud);
+			}
+		}
+	}
 }
 
 void GeneratePerlinFBMNoiseMap(Map * map) {

@@ -112,6 +112,23 @@ void InventoryGUI::Use(int itemID, int itemPos) {
 		msg.msg = "You used the " + itemManager.GetItemData(itemID)->name + ". Refreshing...";
 		engine.console.push_back(msg);
 		break;
+	case 3:
+		msg.col = TCODColor::grey;
+		msg.msg = "You wield the " + itemManager.GetItemData(itemID)->name + ". You feel powerfull...";
+		engine.console.push_back(msg);
+
+		if (engine.player->inv->item_vector.at(itemPos).second < 1) {
+			return;
+		}
+
+		engine.player->inv->item_vector.at(itemPos).second--;
+		engine.player->inv->DeleteRemainingItems();
+
+		engine.player->wep = std::make_shared<Weapon>();
+		engine.player->wep->ATK = itemManager.GetItemData(itemID)->ATK;
+		engine.player->wep->name = itemManager.GetItemData(itemID)->name;
+
+		break;
 	default:
 		msg.col = TCODColor::cyan;
 		msg.msg = "You tried using " + itemManager.GetItemData(itemID)->name + " but you don't really know how.";

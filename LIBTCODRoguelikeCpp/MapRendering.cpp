@@ -91,7 +91,7 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 			float totalCharSat = 0.0f;
 			float totalCharVal = 0.0f;
 
-			int totalBlocks = 0;
+			float totalBlocks = 0;
 
 			int depth = 0;
 
@@ -130,8 +130,10 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 				bool hasGround = false;
 
 				if (curTile != NULL) {
-					if (curTile->type == Tile::wall) {
-
+					if (curTile->type == Tile::empty) {
+						depth++;
+					}
+					else if (!curTile->isTransparent) {
 
 						bool topTile = engine.map->GetTileAt(curPosition + Map::Pos(0, 0, 1)) != nullptr &&
 							engine.map->GetTileAt(curPosition + Map::Pos(0, 0, 1))->type != Tile::wall &&
@@ -181,26 +183,30 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 
 						hasGround = true;
 						stopLoop = true;
-					}
-					else if (curTile->type == Tile::liquid) {
 
+					}
+					else {
 						bg = curTile->bg;
 						color = curTile->color;
 
 						//drawFullCharacter(width - xDrawPosition, height - yDrawPosition, c, color, bg);
 						//hasGround = true;
-						totalBlocks++;
-						totalHue += bg.getHue();
-						totalSat += bg.getSaturation();
-						totalVal += bg.getValue();
 
-						totalCharHue += color.getHue();
-						totalCharSat += color.getSaturation();
-						totalCharVal += color.getValue();
+						totalBlocks += curTile->transparencyStepSize;
 
-					}
-					else {
-						depth++;
+						float bgH, bgS, bgV;
+						float curH, curS, curV;
+
+						bg.getHSV(&bgH, &bgS, &bgV);
+						color.getHSV(&curH, &curS, &curV);
+
+						totalHue += bgH * curTile->transparencyStepSize;
+						totalSat += bgS * curTile->transparencyStepSize;
+						totalVal += bgV * curTile->transparencyStepSize;
+
+						totalCharHue += curH * curTile->transparencyStepSize;
+						totalCharSat += curS * curTile->transparencyStepSize;
+						totalCharVal += curV * curTile->transparencyStepSize;
 					}
 				}
 
@@ -219,13 +225,18 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 				}
 				depth++;
 
-				float curBGHue = ((bg.getHue() + totalHue) / (totalBlocks + 1));
-				float curBGSat = ((bg.getSaturation() + totalSat) / (totalBlocks + 1));
-				float curBGVal = ((bg.getValue() + totalVal) / (totalBlocks + 1));
+				float bgH, bgS, bgV;
+				float curH, curS, curV;
+				bg.getHSV(&bgH, &bgS, &bgV);
+				color.getHSV(&curH, &curS, &curV);
 
-				float curCLHue = ((color.getHue() + totalCharHue) / (totalBlocks + 1));
-				float curCLSat = ((color.getSaturation() + totalCharSat) / (totalBlocks + 1));
-				float curCLVal = ((color.getValue() + totalCharVal) / (totalBlocks + 1));
+				float curBGHue = ((bgH + totalHue) / (totalBlocks + 1));
+				float curBGSat = ((bgS + totalSat) / (totalBlocks + 1));
+				float curBGVal = ((bgV + totalVal) / (totalBlocks + 1));
+
+				float curCLHue = ((curH + totalCharHue) / (totalBlocks + 1));
+				float curCLSat = ((curS + totalCharSat) / (totalBlocks + 1));
+				float curCLVal = ((curV + totalCharVal) / (totalBlocks + 1));
 
 				bg.setHSV(
 					curBGHue,
@@ -241,11 +252,30 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 					c = foundNPC->c;
 				}
 
+				if (hasGround && stopLoop && z == engine.player->pos.d + 1) {
+					c = '#';
+					color = TCODColor::white;
+					float h, s, v;
+					color.getHSV(&h, &s, &v);
+
+					curCLHue = (h + curBGHue) / 2;
+					curCLSat = (s + curBGSat) / 2;
+					curCLVal = (v + curBGVal) / 2;
+				}
+
 				color.setHSV(
 					curCLHue,
 					curCLSat,
 					sqrt(curCLVal / (depth * 0.9))
 				);
+
+				bg.r = (pow(((float)bg.r / 255), (1 / 2.2))) * 255;
+				bg.g = (pow(((float)bg.g / 255), (1 / 2.2))) * 255;
+				bg.b = (pow(((float)bg.b / 255), (1 / 2.2))) * 255;
+
+				color.r = (pow(((float)color.r / 255), (1 / 2.2))) * 255;
+				color.g = (pow(((float)color.g / 255), (1 / 2.2))) * 255;
+				color.b = (pow(((float)color.b / 255), (1 / 2.2))) * 255;
 
 				drawFullCharacter(width - xDrawPosition, height - yDrawPosition, c, color, bg);
 

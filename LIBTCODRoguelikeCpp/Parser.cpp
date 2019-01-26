@@ -17,7 +17,9 @@ void Parser::Run() {
 		->addProperty("short_name", TCOD_TYPE_STRING, false)
 		->addProperty("character", TCOD_TYPE_CHAR, false)
 		->addProperty("character_color", TCOD_TYPE_COLOR, false)
-		->addProperty("background_color", TCOD_TYPE_COLOR, false);
+		->addProperty("background_color", TCOD_TYPE_COLOR, false)
+		->addProperty("ATK", TCOD_TYPE_INT, false)
+		->addFlag("attackItem");
 
 	TCODParserStruct *entityTypeStruct = parser.newStructure("entity_type");
 	
@@ -64,6 +66,16 @@ bool ParserListener::parserNewStruct(TCODParser * parser, const TCODParserStruct
 bool ParserListener::parserFlag(TCODParser * parser, const char * name)
 {
 	std::string n = name;
+	if (parserType == type_item) {
+		if (n == "attackItem") {
+			item.isAttackItem = true;
+		}
+		else {
+			std::string s = item.name + "(ITEM) seems to have an invalid flag: " + n;
+			parser->error(s.c_str());
+			return false;
+		}
+	}
 	if (parserType == type_entity) {
 		if (n == "noCollision") {
 			entity.isColliding = false;
@@ -95,6 +107,9 @@ bool ParserListener::parserProperty(TCODParser * parser, const char * name, TCOD
 		}
 		else if (n == "background_color") {
 			item.bgCol = value.col;
+		}
+		else if (n == "ATK") {
+			item.ATK = value.i;
 		}
 		else {
 			std::string s = item.name + "(ITEM) seems to have an invalid field: " + n;

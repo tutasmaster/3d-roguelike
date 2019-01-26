@@ -3,17 +3,13 @@
 #include <iostream>
 
 TileManager::TileManager() : tiles(), grounds() {
-	/**Empty Tile**/ 
+	/**Empty Tile**/
 	Tile tile_empty;
 	tile_empty.c = ' ';
-	tiles.push_back(tile_empty); 
+	tiles.push_back(tile_empty);
 
-	/**Wall  Tile**/ 
-	Tile tile_wall;
-	tile_wall.c = ' ';
-	tile_wall.bg = TCODColor::white;
-	tile_wall.color = TCODColor::black;
-	tile_wall.type = tile_wall.wall;
+	/**Wall  Tile**/
+	Tile tile_wall{Tile::wall,TCODColor::white,TCODColor::black, 20, 1, false, ' '};
 	tiles.push_back(tile_wall); 
 	/*WallNB  Tile*/ 
 	Tile wallNB;
@@ -50,11 +46,13 @@ TileManager::TileManager() : tiles(), grounds() {
 	tiles.push_back(stone); 
 	/**Water Tile**/ 
 	Tile water;
-	water.c = ' ';
+	water.c = '~';
 	water.bg = TCODColor::blue;
-	water.color = TCODColor::blue;
+	water.color = TCODColor::lightCyan;
 	water.type = water.liquid;
 	water.isBlocking = false;
+	water.isTransparent = true;
+	water.transparencyStepSize = 2;
 	tiles.push_back(water); 
 	/**Wood  Tile**/ 
 	Tile wood; 
@@ -88,6 +86,18 @@ TileManager::TileManager() : tiles(), grounds() {
 	cacti.type = cacti.wall;
 	cacti.isBlocking = false;
 	tiles.push_back(cacti); 
+
+	Tile cloud;
+	cloud.c = '~';
+	cloud.bg = TCODColor::white;
+	cloud.color = TCODColor::white;
+	cloud.type = cloud.liquid;
+	cloud.transparencyStepSize = 0.8f;
+	cloud.isTransparent = true;
+	tiles.push_back(cloud);
+
+	Tile glass{ Tile::wall, TCODColor::white, TCODColor::black, 20, 0.2f, true, ' ' };
+	tiles.push_back(glass);
 
 	//GROUND TYPES
 

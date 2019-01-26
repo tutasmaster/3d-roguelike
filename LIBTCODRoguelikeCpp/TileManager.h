@@ -5,6 +5,7 @@
 
 class Tile {
 public:
+
 	enum Type {
 		empty,
 		wall,
@@ -15,6 +16,9 @@ public:
 	TCODColor color = TCODColor::white;
 
 	int shadeLimit = 20;
+
+	float transparencyStepSize = 1;
+	bool isTransparent = false;
 
 	char c = '.';
 
@@ -60,6 +64,8 @@ public:
 		tile_leaves,
 		tile_sand,
 		tile_cacti,
+		tile_cloud,
+		tile_glass
 	};
 
 	enum groundIDs : unsigned char {

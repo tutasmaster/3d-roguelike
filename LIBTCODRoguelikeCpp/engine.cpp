@@ -5,6 +5,10 @@ Engine::Engine()
 {
 	Parser().Run();
 
+	for (auto &npc : npcs) {
+		npc->meta = std::make_shared<Metabolism>(npc);
+	}
+
 	UI_list.push_back(std::make_unique<InventoryGUI>());
 	UI_list.push_back(std::make_unique<DropGUI>());
 	UI_list.push_back(std::make_unique<AnnouncementsGUI>());
@@ -16,9 +20,9 @@ Engine::Engine()
 	TCODConsole::initRoot(64, 80, "Roguelike");
 
 	player->c = '@';
-	player->ai = std::make_shared<WorldBuilderAi>(player);
-	player->ren = std::make_shared<WorldBuilderRenderer>();
-	//player->ai = std::make_shared<PlayerAi>();
+	/*player->ai = std::make_shared<WorldBuilderAi>(player);
+	player->ren = std::make_shared<WorldBuilderRenderer>();*/
+	player->ai = std::make_shared<PlayerAi>();
 	player->inv = std::make_shared<PlayerInventory>();
 
 	for (int i = 0; i < itemManager.items.size(); i++) {
