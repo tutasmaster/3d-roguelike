@@ -64,7 +64,7 @@ void GeneratePerlinNoiseMap(Map * map) {
 
 			for (int h = 0; h < value; h++) {
 				if(biomeValue > 0.1){
-					map->SetAt(i, j, h, TileManager::tile_dirt, TileManager::ground_grass);
+					map->SetAt(i, j, h, TileManager::tile_dirt, TileManager::ground_empty);
 					if (h < 10) {
 						map->SetAt(i, j, h, TileManager::tile_stone, TileManager::ground_empty);
 					}
@@ -78,8 +78,9 @@ void GeneratePerlinNoiseMap(Map * map) {
 			}
 			if (value > 13) {
 				if (biomeValue > 0.1) {
-					map->SetAt(i, j, value, TileManager::tile_grass, TileManager::ground_grass);
-					map->SetGroundAt(i, j, value + 1, TileManager::ground_grass);
+					map->SetAt(i, j, value, TileManager::tile_grass, TileManager::ground_empty);
+					map->SetAt(i, j, value + 1, TileManager::tile_grass, TileManager::ground_empty);
+					map->SetGroundAt(i, j, value + 2, TileManager::ground_grass);
 				}
 				else {
 					map->SetTileAt(i, j, value, TileManager::tile_sand);

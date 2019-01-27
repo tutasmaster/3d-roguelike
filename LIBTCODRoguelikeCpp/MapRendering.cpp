@@ -99,10 +99,7 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 			for (int z = curPosition.d; z >= 0; z--) {
 				bool stopLoop = false;
 
-				if(depth > 3)
-					curPosition = curPosition + Map::Pos(xAngleOffset, yAngleOffset, -1);
-				else
-					curPosition = curPosition + Map::Pos(0, 0, -1);
+				curPosition = curPosition + Map::Pos(xAngleOffset, yAngleOffset, -1);
 
 				bool hasNPC = false;
 
@@ -282,9 +279,6 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 				color.r = (pow(((float)color.r / 255), (1 / 2.2))) * 255;
 				color.g = (pow(((float)color.g / 255), (1 / 2.2))) * 255;
 				color.b = (pow(((float)color.b / 255), (1 / 2.2))) * 255;
-
-				if (depth > 2 && foundNPC == nullptr)
-					c = ' ';
 
 				drawFullCharacter(width - xDrawPosition, height - yDrawPosition, c, color, bg);
 
