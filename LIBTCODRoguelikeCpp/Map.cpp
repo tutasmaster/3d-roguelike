@@ -4,12 +4,12 @@
 
 #include "engine.hpp"
 
-Map::Map(int w = 255, int h = 255, int d = 255) : width(w) , height(h) , depth(d)
+Map::Map(int w = 255, int y = 255, int z = 255) : width(w) , height(y) , depth(z)
 {
-	arr = new TileID[w*h*d];
-	groundArr = new GroundID[w*h*d];
+	arr = new TileID[w*y*z];
+	groundArr = new GroundID[w*y*z];
 
-	for (int i = 0; i < w*h*d; i++) {
+	for (int i = 0; i < w*y*z; i++) {
 		arr[i] = 0;
 		groundArr[i] = 0;
 	}
@@ -22,32 +22,32 @@ Map::~Map()
 }
 
 Tile* Map::GetTileAt(Pos pos) {
-	if ((pos.w > -1 && pos.h > -1 && pos.d > -1) &&
-		(pos.w < width && pos.h < height && pos.d < depth))
-		return tileManager.GetTileData(arr[pos.w + (pos.h * width) + (pos.d * width * height)]);
+	if ((pos.x > -1 && pos.y > -1 && pos.z > -1) &&
+		(pos.x < width && pos.y < height && pos.z < depth))
+		return tileManager.GetTileData(arr[pos.x + (pos.y * width) + (pos.z * width * height)]);
 	return nullptr;
 }
 
-Tile* Map::GetTileAt(int w, int h, int d) {
-	if ((w > -1 && h > -1 && d > -1) &&
-		(w < width && h < height && d < depth))
-		return tileManager.GetTileData(arr[w + (h * width) + (d * width * height)]);
+Tile* Map::GetTileAt(int w, int y, int z) {
+	if ((w > -1 && y > -1 && z > -1) &&
+		(w < width && y < height && z < depth))
+		return tileManager.GetTileData(arr[w + (y * width) + (z * width * height)]);
 	return nullptr;
 }
 
 bool Map::SetAt(const Pos p, TileID tile, GroundID ground) {
 	if (isPosValid(p)) {
-		groundArr[(p.w) + ((p.h)*width) + ((p.d)*height * width)] = ground;
-		arr[(p.w) + ((p.h)*width) + ((p.d)*height * width)] = tile;
+		groundArr[(p.x) + ((p.y)*width) + ((p.z)*height * width)] = ground;
+		arr[(p.x) + ((p.y)*width) + ((p.z)*height * width)] = tile;
 		return true;
 	}
 	return false;
 }
 
-bool Map::SetAt(const int w, const int h, const int d, TileID tile, GroundID ground) {
-	if (isPosValid(w, h, d)) {
-		groundArr[(w)+((h)*width) + ((d)*height * width)] = ground;
-		arr[(w)+((h)*width) + ((d)*height * width)] = tile;
+bool Map::SetAt(const int w, const int y, const int z, TileID tile, GroundID ground) {
+	if (isPosValid(w, y, z)) {
+		groundArr[(w)+((y)*width) + ((z)*height * width)] = ground;
+		arr[(w)+((y)*width) + ((z)*height * width)] = tile;
 		return true;
 	}
 	return false;
@@ -56,15 +56,15 @@ bool Map::SetAt(const int w, const int h, const int d, TileID tile, GroundID gro
 
 bool Map::SetTileAt(const Pos p, TileID tile) {
 	if (isPosValid(p)) {
-		arr[(p.w) + ((p.h)*width) + ((p.d)*height * width)] = tile;
+		arr[(p.x) + ((p.y)*width) + ((p.z)*height * width)] = tile;
 		return true;
 	}
 	return false;
 }
 
-bool Map::SetTileAt(const int w, const int h, const int d, TileID tile) {
-	if(isPosValid(w,h,d)){
-		arr[(w) + ((h)*width) + ((d)*height * width)] = tile;
+bool Map::SetTileAt(const int w, const int y, const int z, TileID tile) {
+	if(isPosValid(w,y,z)){
+		arr[(w) + ((y)*width) + ((z)*height * width)] = tile;
 		return true;
 	}
 	return false;
@@ -73,11 +73,11 @@ bool Map::SetTileAt(const int w, const int h, const int d, TileID tile) {
 
 
 bool Map::isPosValid(Pos p) {
-	return ((p.w > -1 && p.h > -1 && p.d > -1) && (p.w < width && p.h < height && p.d < depth));
+	return ((p.x > -1 && p.y > -1 && p.z > -1) && (p.x < width && p.y < height && p.z < depth));
 }
 
-bool Map::isPosValid(int w, int h, int d) {
-	return ((w > -1 && h > -1 && d > -1) && (w < width && h < height && d < depth));
+bool Map::isPosValid(int w, int y, int z) {
+	return ((w > -1 && y > -1 && z > -1) && (w < width && y < height && z < depth));
 }
 
 bool Map::isTilePosWalkable(Pos p) {
@@ -86,38 +86,38 @@ bool Map::isTilePosWalkable(Pos p) {
 		!engine.checkEntityCollisionAtPos(p));
 }
 
-bool Map::isTilePosWalkable(int w, int h, int d) {
-	Pos p(w, h, d);
+bool Map::isTilePosWalkable(int w, int y, int z) {
+	Pos p(w, y, z);
 	return isTilePosWalkable(p);
 }
 
 
 Ground* Map::GetGroundAt(Pos pos) {
-	if ((pos.w > -1 && pos.h > -1 && pos.d > -1) &&
-		(pos.w < width && pos.h < height && pos.d < depth))
-		return tileManager.GetGroundData(groundArr[pos.w + (pos.h * width) + (pos.d * width * height)]);
+	if ((pos.x > -1 && pos.y > -1 && pos.z > -1) &&
+		(pos.x < width && pos.y < height && pos.z < depth))
+		return tileManager.GetGroundData(groundArr[pos.x + (pos.y * width) + (pos.z * width * height)]);
 	return nullptr;
 }
 
-Ground* Map::GetGroundAt(int w, int h, int d) {
-	if ((w > -1 && h > -1 && d > -1) &&
-		(w < width && h < height && d < depth))
-		return tileManager.GetGroundData(groundArr[w + (h * width) + (d * width * height)]);
+Ground* Map::GetGroundAt(int w, int y, int z) {
+	if ((w > -1 && y > -1 && z > -1) &&
+		(w < width && y < height && z < depth))
+		return tileManager.GetGroundData(groundArr[w + (y * width) + (z * width * height)]);
 	return nullptr;
 }
 
 
 bool Map::SetGroundAt(const Pos p, GroundID tile) {
 	if (isPosValid(p)) {
-		groundArr[(p.w) + ((p.h)*width) + ((p.d)*height * width)] = tile;
+		groundArr[(p.x) + ((p.y)*width) + ((p.z)*height * width)] = tile;
 		return true;
 	}
 	return false;
 }
 
-bool Map::SetGroundAt(const int w, const int h, const int d, GroundID tile) {
-	if (isPosValid(w, h, d)) {
-		groundArr[(w)+((h)*width) + ((d)*height * width)] = tile;
+bool Map::SetGroundAt(const int w, const int y, const int z, GroundID tile) {
+	if (isPosValid(w, y, z)) {
+		groundArr[(w)+((y)*width) + ((z)*height * width)] = tile;
 		return true;
 	}
 	return false;
@@ -129,9 +129,9 @@ bool Map::SetGroundAt(const int w, const int h, const int d, GroundID tile) {
 Map::Pos Map::Pos::operator+(const Pos& p) {
 	Pos v(0,0,0);
 
-	v.w = p.w + this->w;
-	v.h = p.h + this->h;
-	v.d = p.d + this->d;
+	v.x = p.x + this->x;
+	v.y = p.y + this->y;
+	v.z = p.z + this->z;
 
 	return v;
 }
@@ -139,9 +139,9 @@ Map::Pos Map::Pos::operator+(const Pos& p) {
 Map::Pos Map::Pos::operator+(int v) {
 	Pos n(0, 0, 0);
 
-	n.w = v + this->w;
-	n.h = v + this->h;
-	n.d = v + this->d;
+	n.x = v + this->x;
+	n.y = v + this->y;
+	n.z = v + this->z;
 
 	return n;
 }
@@ -149,15 +149,15 @@ Map::Pos Map::Pos::operator+(int v) {
 Map::Pos Map::Pos::operator*(int f) {
 	Pos n(0, 0, 0);
 
-	n.w = f * this->w;
-	n.h = f * this->h;
-	n.d = f * this->d;
+	n.x = f * this->x;
+	n.y = f * this->y;
+	n.z = f * this->z;
 
 	return n;
 }
 
 bool Map::Pos::operator==(const Pos&b) {
-	return (w == b.w && h == b.h && d == b.d);
+	return (x == b.x && y == b.y && z == b.z);
 }
 
 void SetMapLayer(Map& m, int l, TileID tile) {
@@ -168,10 +168,10 @@ void SetMapLayer(Map& m, int l, TileID tile) {
 	}
 }
 
-void DrawSquareOnMap(Map& m, int x, int y, int w, int h, int d, TileID tile) {
+void DrawSquareOnMap(Map& m, int x, int y, int w, int h, int z, TileID tile) {
 	for (int j = y; j < h + y; j++) {
 		for (int i = x; i < w + x; i++) {
-			m.SetTileAt(i, j, d, tile);
+			m.SetTileAt(i, j, z, tile);
 		}
 	}
 }
@@ -211,3 +211,18 @@ void Map::GenerateTerrain(int type) {
 	}
 }
 
+float GetDistance(int x, int y, int z, int x1, int y1, int z1) {
+	float tempX = x1 - x;
+	float tempY = y1 - y;
+	float tempZ = z1 - z;
+
+	return sqrt(tempX * tempX + tempY * tempY + tempZ * tempZ);
+}
+
+float GetDistance(Map::Pos pos, Map::Pos pos1) {
+	float tempX = pos1.x - pos.x;
+	float tempY = pos1.y - pos.y;
+	float tempZ = pos1.z - pos.z;
+
+	return sqrt(tempX * tempX + tempY * tempY + tempZ * tempZ);
+}

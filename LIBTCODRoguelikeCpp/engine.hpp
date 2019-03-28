@@ -24,6 +24,7 @@ public:
 	void renderMapInverted();
 	void renderMapZoomedOut();
 	void renderMapStandard();
+	void renderMapTesting(int mOffX, int mOffY, int angle, int width = 62, int height = 62);
 	void renderCompass(char angle);
 	void drawFullCharacter(int x, int y, char c, const TCODColor col, const TCODColor bg);
 
@@ -34,6 +35,11 @@ public:
 class Engine
 {
 public:
+
+	enum Scenes {
+		playing,
+		gameover
+	} curScene = playing;
 
 	std::vector<std::shared_ptr<Effect>> effects;
 
@@ -62,6 +68,12 @@ public:
 	void init();
 	void render();
 	void update();
+
+	void playingRender();
+	void playingUpdate();
+
+	void gameoverRender();
+	void gameoverUpdate();
 
 	std::vector<int> GetAngles(char angle);
 

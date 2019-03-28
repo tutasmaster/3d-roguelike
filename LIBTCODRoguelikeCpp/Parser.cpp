@@ -135,6 +135,9 @@ bool ParserListener::parserProperty(TCODParser * parser, const char * name, TCOD
 			else if (val == "friendly") {
 				entity.ai = std::make_shared<FriendlyAi>();
 			}
+			else if (val == "enemy") {
+				entity.ai = std::make_shared<EnemyAi>();
+			}
 			else {
 				std::string s = entity.name + "(ENTITY) seems to have an invalid type of AI: " + val;
 				parser->error(s.c_str());

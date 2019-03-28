@@ -41,6 +41,7 @@ int Metabolism::DoDamage(int ATK) {
 		Message msg{ s, TCODColor::red };
 		engine.console.push_back(msg);
 	}
+	return 0;
 }
 
 
@@ -49,7 +50,7 @@ void WorldBuilderRenderer::OnRender(std::shared_ptr<Entity> entity) {
 }
 
 void BoulderPhysics::ApplyPhysics(std::shared_ptr<Entity> entity) {
-	if (engine.map->GetTileAt(Map::Pos(entity->pos.w, entity->pos.h, entity->pos.d - 1)) != nullptr && engine.map->GetTileAt(Map::Pos(entity->pos.w, entity->pos.h, entity->pos.d - 1))->type != TileManager::tile_wall) {
+	if (engine.map->GetTileAt(Map::Pos(entity->pos.x, entity->pos.y, entity->pos.z - 1)) != nullptr && engine.map->GetTileAt(Map::Pos(entity->pos.x, entity->pos.y, entity->pos.z - 1))->type != TileManager::tile_wall) {
 		speedZ -= gravity;
 	}
 
@@ -61,10 +62,10 @@ void BoulderPhysics::ApplyPhysics(std::shared_ptr<Entity> entity) {
 	relPosY += speedY;
 	relPosZ += speedZ;
 
-	if(engine.map->GetTileAt(entity->pos.w + relPosX, entity->pos.h + relPosY, entity->pos.d + relPosZ)->type == TileManager::tile_empty){
-		entity->pos.w += (int)relPosX;
-		entity->pos.h += (int)relPosY;
-		entity->pos.d += (int)relPosZ;
+	if(engine.map->GetTileAt(entity->pos.x + relPosX, entity->pos.y + relPosY, entity->pos.z + relPosZ)->type == TileManager::tile_empty){
+		entity->pos.x += (int)relPosX;
+		entity->pos.y += (int)relPosY;
+		entity->pos.z += (int)relPosZ;
 	}
 
 	relPosX = (int)relPosX % 1;
@@ -89,7 +90,7 @@ void Inventory::DeleteRemainingItems() {
 void Inventory::PickupItem(Map::Pos p) {
 	int i = 0;
 	for (auto &e : engine.npcs) {
-		if (e->isItem) {
+		if (e->isItem && e->pos == p) {
 			AddItem(e->itemID);
 			engine.npcs.erase(engine.npcs.begin() + i);
 			break;
@@ -115,7 +116,7 @@ void Inventory::AddItem(int itemID) {
 void PlayerInventory::PickupItem(Map::Pos p) {
 	int i = 0;
 	for (auto &e : engine.npcs) {
-		if (e->isItem) {
+		if (e->isItem && e->pos == p) {
 			AddItem(e->itemID);
 			Message pkup;
 			pkup.col = TCODColor::gold;

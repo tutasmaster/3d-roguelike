@@ -14,45 +14,45 @@ bool Ai::Move(std::shared_ptr<Entity> entity, int x, int y, int z)
 
 bool Ai::MoveRelative(std::shared_ptr<Entity> entity, int x, int y, int z)
 {
-	return Move(entity, x + entity->pos.w, y + entity->pos.h, z + entity->pos.d);
+	return Move(entity, x + entity->pos.x, y + entity->pos.y, z + entity->pos.z);
 }
 
 void Ai::Follow(std::shared_ptr<Entity> entity, std::shared_ptr<Entity> follower, int step = 1) {
 	Map::Pos movement;
 
-	if (entity->pos.w < follower->pos.w) {
-		movement.w = step;
+	if (entity->pos.x < follower->pos.x) {
+		movement.x = step;
 	}
-	else if (entity->pos.w > follower->pos.w) {
-		movement.w = -step;
-	}
-
-	if (entity->pos.h < follower->pos.h) {
-		movement.h = step;
-	}
-	else if (entity->pos.h > follower->pos.h) {
-		movement.h = -step;
+	else if (entity->pos.x > follower->pos.x) {
+		movement.x = -step;
 	}
 
-	if (entity->pos.d < follower->pos.d) {
-		movement.d = step;
+	if (entity->pos.y < follower->pos.y) {
+		movement.y = step;
 	}
-	else if (entity->pos.d > follower->pos.d) {
-		movement.d = -step;
+	else if (entity->pos.y > follower->pos.y) {
+		movement.y = -step;
 	}
 
-	MoveRelative(entity, movement.w, movement.h, movement.d);
+	if (entity->pos.z < follower->pos.z) {
+		movement.z = step;
+	}
+	else if (entity->pos.z > follower->pos.z) {
+		movement.z = -step;
+	}
+
+	MoveRelative(entity, movement.x, movement.y, movement.z);
 }
 
 bool Ai::OnMoveSideways(std::shared_ptr<Entity> entity, int x, int y)
 {
-	Map::Pos p(entity->pos.w + x, entity->pos.h + y, entity->pos.d);
+	Map::Pos p(entity->pos.x + x, entity->pos.y + y, entity->pos.z);
 
 	if (entity->isColliding) {
-		Map::Pos top(entity->pos.w + x, entity->pos.h + y, entity->pos.d + 1);
-		Map::Pos bot(entity->pos.w + x, entity->pos.h + y, entity->pos.d - 1);
-		Map::Pos botB(entity->pos.w + x, entity->pos.h + y, entity->pos.d - 2);
-		Map::Pos topP(entity->pos.w, entity->pos.h, entity->pos.d + 1);
+		Map::Pos top(entity->pos.x + x, entity->pos.y + y, entity->pos.z + 1);
+		Map::Pos bot(entity->pos.x + x, entity->pos.y + y, entity->pos.z - 1);
+		Map::Pos botB(entity->pos.x + x, entity->pos.y + y, entity->pos.z - 2);
+		Map::Pos topP(entity->pos.x, entity->pos.y, entity->pos.z + 1);
 
 		bool cB, tB, bB, bbB, tpB; //yarr yarr fiddle dee dee, shitty variable names is alright with me.
 
@@ -77,12 +77,21 @@ bool Ai::OnMoveSideways(std::shared_ptr<Entity> entity, int x, int y)
 			engine.console.push_back(msg);*/
 			return false;
 		}
+		else if (!cB && !bB && !tB) {
+			return false;
+		}
+		else if (tB && !cB && !tpB) {
+			entity->pos = top;
+		}
+		else {
+			std::cout << "Found unhandled type of block structure: cB:" << cB << ", tB:" << tB << ", bB:" << bB << ", bbB:" << bbB << ", tpB:" << tpB << "\n";
+		}
 		return true;
 
 	}
 	else {
 		entity->pos = p;
-		return true;
+		return false;
 	}
 }
 
@@ -112,8 +121,8 @@ void FriendlyAi::OnTick(std::shared_ptr<Entity> entity) {
 
 void WanderingAi::OnTick(std::shared_ptr<Entity> entity) {
 	if (!isFollowing) {
-		int x = entity->pos.w - ((rand() % 10) - 5);
-		int y = entity->pos.h - ((rand() % 10) - 5);
+		int x = entity->pos.x - ((rand() % 10) - 5);
+		int y = entity->pos.y - ((rand() % 10) - 5);
 
 		nextPosX = x;
 		nextPosY = y;
@@ -124,8 +133,8 @@ void WanderingAi::OnTick(std::shared_ptr<Entity> entity) {
 	}
 	else {
 
-		int relativeX = nextPosX - entity->pos.w;
-		int relativeY = nextPosY - entity->pos.h;
+		int relativeX = nextPosX - entity->pos.x;
+		int relativeY = nextPosY - entity->pos.y;
 
 		if (relativeX > 0)
 			relativeX = 1;
@@ -145,10 +154,84 @@ void WanderingAi::OnTick(std::shared_ptr<Entity> entity) {
 			isFollowing = false;
 		}
 
-		if (entity->pos.w == nextPosX && entity->pos.h == nextPosY) {
+		if (entity->pos.x == nextPosX && entity->pos.y == nextPosY) {
 			isFollowing = false;
 		}
 	}
+}
+
+void EnemyAi::OnTick(std::shared_ptr<Entity> entity) {
+	
+	if(hasFoundPlayer){
+		nextPosX = engine.player->pos.x;
+		nextPosY = engine.player->pos.y;
+
+		int relativeX = nextPosX - entity->pos.x;
+		int relativeY = nextPosY - entity->pos.y;
+
+		if (relativeX > 0)
+			relativeX = 1;
+		else if (relativeX < 0)
+			relativeX = -1;
+
+		if (relativeY > 0)
+			relativeY = 1;
+		else if (relativeY < 0)
+			relativeY = -1;
+
+		if (!OnMoveSideways(entity, relativeX, relativeY)) {
+			hasFoundPlayer = false;
+		}
+
+		if (GetDistance(entity->pos, engine.player->pos) < 1.5) {
+			engine.player->meta->DoDamage(20);
+		}
+	}
+	else {
+		if (!isFollowing) {
+			int x = entity->pos.x - ((rand() % 10) - 5);
+			int y = entity->pos.y - ((rand() % 10) - 5);
+
+			nextPosX = x;
+			nextPosY = y;
+
+			isFollowing = true;
+
+
+		}
+		else {
+
+			int relativeX = nextPosX - entity->pos.x;
+			int relativeY = nextPosY - entity->pos.y;
+
+			if (relativeX > 0)
+				relativeX = 1;
+			else if (relativeX < 0)
+				relativeX = -1;
+			else
+				relativeX = 0;
+
+			if (relativeY > 0)
+				relativeY = 1;
+			else if (relativeY < 0)
+				relativeY = -1;
+			else
+				relativeY = 0;
+
+			if (!OnMoveSideways(entity, relativeX, relativeY)) {
+				isFollowing = false;
+			}
+
+			if (entity->pos.x == nextPosX && entity->pos.y == nextPosY) {
+				isFollowing = false;
+			}
+		}
+
+		if (GetDistance(entity->pos, engine.player->pos) < 7) {
+			hasFoundPlayer = true;
+		}
+	}
+	
 }
 
 void PlayerAi::OnTick(std::shared_ptr<Entity> entity)
@@ -156,19 +239,19 @@ void PlayerAi::OnTick(std::shared_ptr<Entity> entity)
 	auto lastKey = engine.keyboardInput.pressed ? engine.keyboardInput : TCOD_key_t();
 
 	if (engine.mouseInput.lbutton && engine.mouseInput.cx > 26 && engine.mouseInput.cx < 38 && engine.mouseInput.cy > 26 && engine.mouseInput.cy < 38) {
-		engine.map->SetTileAt(Map::Pos(engine.player->pos.w + engine.mouseInput.cx - 32, engine.player->pos.h + engine.mouseInput.cy - 32, engine.player->pos.d),
+		engine.map->SetTileAt(Map::Pos(engine.player->pos.x + engine.mouseInput.cx - 32, engine.player->pos.y + engine.mouseInput.cy - 32, engine.player->pos.z),
 			tileManager.tile_empty);
 
-		engine.map->SetGroundAt(Map::Pos(engine.player->pos.w + engine.mouseInput.cx - 32, engine.player->pos.h + engine.mouseInput.cy - 32, engine.player->pos.d + 1),
+		engine.map->SetGroundAt(Map::Pos(engine.player->pos.x + engine.mouseInput.cx - 32, engine.player->pos.y + engine.mouseInput.cy - 32, engine.player->pos.z + 1),
 			tileManager.ground_empty);
 	}
 
 	if (isDigging)
-		engine.map->SetTileAt(entity->pos.w, entity->pos.h, entity->pos.d, TileManager::tile_empty);
+		engine.map->SetTileAt(entity->pos.x, entity->pos.y, entity->pos.z, TileManager::tile_empty);
 	else if (isBuilding)
-		engine.map->SetTileAt(entity->pos.w, entity->pos.h, entity->pos.d, TileManager::tile_wall);
+		engine.map->SetTileAt(entity->pos.x, entity->pos.y, entity->pos.z, TileManager::tile_wall);
 	else if (isBuildingNB)
-		engine.map->SetTileAt(entity->pos.w, entity->pos.h, entity->pos.d, TileManager::tile_wallNB);
+		engine.map->SetTileAt(entity->pos.x, entity->pos.y, entity->pos.z, TileManager::tile_wallNB);
 
 
 		/*case 0:
@@ -238,6 +321,7 @@ void PlayerAi::OnTick(std::shared_ptr<Entity> entity)
 		engine.GUI_ID = 2;
 		break;
 	case 'g':
+		std::cout << 'g\n';
 		entity->inv->PickupItem(entity->pos);
 		break;
 	case 'c':
@@ -246,6 +330,9 @@ void PlayerAi::OnTick(std::shared_ptr<Entity> entity)
 		/*case 'c':
 			engine.GUI_ID = 3;
 			break;*/
+	case 'f':
+		engine.console.push_back({ "You start flossing for no reason... You feel shame.", TCODColor::red });
+		break;
 	}
 
 	/*std::shared_ptr<Effect> f = std::make_shared<FireEffect>();
@@ -429,31 +516,31 @@ void WorldBuilderAi::OrderPositions() {
 	Map::Pos temp1;
 	Map::Pos temp2;
 
-	if (pos1.w > pos2.w) {
-		temp1.w = pos2.w;
-		temp2.w = pos1.w;
+	if (pos1.x > pos2.x) {
+		temp1.x = pos2.x;
+		temp2.x = pos1.x;
 	}
 	else {
-		temp1.w = pos1.w;
-		temp2.w = pos2.w;
+		temp1.x = pos1.x;
+		temp2.x = pos2.x;
 	}
 
-	if (pos1.h > pos2.h) {
-		temp1.h = pos2.h;
-		temp2.h = pos1.h;
+	if (pos1.y > pos2.y) {
+		temp1.y = pos2.y;
+		temp2.y = pos1.y;
 	}
 	else {
-		temp1.h = pos1.h;
-		temp2.h = pos2.h;
+		temp1.y = pos1.y;
+		temp2.y = pos2.y;
 	}
 
-	if (pos1.d > pos2.d) {
-		temp1.d = pos2.d;
-		temp2.d = pos1.d;
+	if (pos1.z > pos2.z) {
+		temp1.z = pos2.z;
+		temp2.z = pos1.z;
 	}
 	else {
-		temp1.d = pos1.d;
-		temp2.d = pos2.d;
+		temp1.z = pos1.z;
+		temp2.z = pos2.z;
 	}
 	pos1 = temp1;
 	pos2 = temp2;
@@ -461,10 +548,10 @@ void WorldBuilderAi::OrderPositions() {
 
 void WorldBuilderAi::BuildBlock() {
 
-	for (int j = pos1.h; j <= pos2.h; j++) {
-		for (int i = pos1.w; i <= pos2.w; i++) {
-			for (int h = pos1.d; h <= pos2.d; h++) {
-				engine.map->SetTileAt(i, j, h, block);
+	for (int j = pos1.y; j <= pos2.y; j++) {
+		for (int i = pos1.x; i <= pos2.x; i++) {
+			for (int y = pos1.z; y <= pos2.z; y++) {
+				engine.map->SetTileAt(i, j, y, block);
 			}
 		}
 	}
@@ -473,24 +560,24 @@ void WorldBuilderAi::BuildBlock() {
 void WorldBuilderAi::BuildCylinder() {
 
 
-	float radius = sqrt(((pos1.w - pos2.w) * (pos1.w - pos2.w)) + ((pos1.h - pos2.h) * (pos1.h - pos2.h)));
+	float radius = sqrt(((pos1.x - pos2.x) * (pos1.x - pos2.x)) + ((pos1.y - pos2.y) * (pos1.y - pos2.y)));
 
 	std::cout << radius << "\n";
 
 
 
-	float x = pos1.w;
-	float y = pos1.h;
+	float x = pos1.x;
+	float y = pos1.y;
 
-	for (int j = pos1.h - radius; j <= pos1.h + radius; j++) {
-		for (int i = pos1.w - radius; i <= pos1.w + radius; i++) {
-			for (int h = pos1.d; h <= pos2.d; h++) {
-				float currentRadius = sqrt(((i - pos1.w) * (i - pos1.w)) + ((j - pos1.h) * (j - pos1.h)));
+	for (int j = pos1.y - radius; j <= pos1.y + radius; j++) {
+		for (int i = pos1.x - radius; i <= pos1.x + radius; i++) {
+			for (int y = pos1.z; y <= pos2.z; y++) {
+				float currentRadius = sqrt(((i - pos1.x) * (i - pos1.x)) + ((j - pos1.y) * (j - pos1.y)));
 
 				//std::cout << currentRadius << "\n";
 
 				if (currentRadius <= radius) {
-					engine.map->SetTileAt(i, j, h, block);
+					engine.map->SetTileAt(i, j, y, block);
 				}
 			}
 		}
@@ -500,26 +587,26 @@ void WorldBuilderAi::BuildCylinder() {
 
 void WorldBuilderAi::BuildSphere() {
 
-	float radius = sqrt(((pos1.w - pos2.w) * (pos1.w - pos2.w)) + ((pos1.h - pos2.h) * (pos1.h - pos2.h)));
+	float radius = sqrt(((pos1.x - pos2.x) * (pos1.x - pos2.x)) + ((pos1.y - pos2.y) * (pos1.y - pos2.y)));
 
-	float fullRadius = sqrt((radius*radius) + ((pos1.d - pos2.d) * (pos1.d - pos2.d)));
+	float fullRadius = sqrt((radius*radius) + ((pos1.z - pos2.z) * (pos1.z - pos2.z)));
 
 	std::cout << radius << "\n";
 
 
 
-	float x = pos1.w;
-	float y = pos1.h;
+	float x = pos1.x;
+	float y = pos1.y;
 
-	for (int j = pos1.h - radius; j <= pos1.h + radius; j++) {
-		for (int i = pos1.w - radius; i <= pos1.w + radius; i++) {
-			for (int h = pos1.d - radius; h <= pos1.d + radius; h++) {
-				float partialRadius = sqrt(((i - pos1.w) * (i - pos1.w)) + ((j - pos1.h) * (j - pos1.h)));
-				float currentRadius = sqrt((partialRadius * partialRadius) + ((h - pos1.d) * (h - pos1.d)));
+	for (int j = pos1.y - radius; j <= pos1.y + radius; j++) {
+		for (int i = pos1.x - radius; i <= pos1.x + radius; i++) {
+			for (int y = pos1.z - radius; y <= pos1.z + radius; y++) {
+				float partialRadius = sqrt(((i - pos1.x) * (i - pos1.x)) + ((j - pos1.y) * (j - pos1.y)));
+				float currentRadius = sqrt((partialRadius * partialRadius) + ((y - pos1.z) * (y - pos1.z)));
 				//std::cout << currentRadius << "\n";
 
 				if (currentRadius <= radius) {
-					engine.map->SetTileAt(i, j, h, block);
+					engine.map->SetTileAt(i, j, y, block);
 				}
 			}
 		}
@@ -548,61 +635,61 @@ void CastAi::OnTick(std::shared_ptr<Entity> entity) {
 		Map::Pos p = entity->pos;
 
 		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
-		p.w--;
+		p.x--;
 		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
-		p.h--;
+		p.y--;
 		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
-		p.w++;
+		p.x++;
 		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
-		p.w++;
+		p.x++;
 		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
-		p.h++;
+		p.y++;
 		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
-		p.h++;
+		p.y++;
 		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
-		p.w--;
+		p.x--;
 		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
-		p.w--;
-		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
-
-		p = entity->pos;
-		p.d--;
-		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
-		p.w--;
-		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
-		p.h--;
-		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
-		p.w++;
-		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
-		p.w++;
-		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
-		p.h++;
-		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
-		p.h++;
-		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
-		p.w--;
-		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
-		p.w--;
+		p.x--;
 		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
 
 		p = entity->pos;
-		p.d++;
+		p.z--;
 		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
-		p.w--;
+		p.x--;
 		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
-		p.h--;
+		p.y--;
 		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
-		p.w++;
+		p.x++;
 		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
-		p.w++;
+		p.x++;
 		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
-		p.h++;
+		p.y++;
 		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
-		p.h++;
+		p.y++;
 		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
-		p.w--;
+		p.x--;
 		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
-		p.w--;
+		p.x--;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+
+		p = entity->pos;
+		p.z++;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.x--;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.y--;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.x++;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.x++;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.y++;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.y++;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.x--;
+		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
+		p.x--;
 		engine.map->SetAt(p, tileManager.tile_empty, tileManager.ground_empty);
 
 		engine.npcs.erase(std::remove(engine.npcs.begin(), engine.npcs.end(), entity), engine.npcs.end());

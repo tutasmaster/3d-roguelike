@@ -24,11 +24,12 @@ std::vector<int> Engine::GetAngles(char angle) {
 
 	angles.push_back(xAngleOffset);
 	angles.push_back(yAngleOffset);
+	return angles;
 }
 
-void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int height) {
+void EngineRenderer::renderMapTesting(int mOffX, int mOffY, int angle, int width, int height) {
 	for (int j = 0; j < height; j++) {
-		for (int i = 0; i < width; i++) {	
+		for (int i = 0; i < width; i++) {
 
 			int xAngleOffset, yAngleOffset;
 
@@ -54,8 +55,8 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 			int xAngleOffsetTrunc = xAngleOffset < 0 ? 0 : 1;
 			int yAngleOffsetTrunc = yAngleOffset < 0 ? 0 : 1;
 
-			int curI = xAngleOffset < 0 ? (width-1) - i : i;
-			int curJ = yAngleOffset < 0 ? (height-1) - j : j;
+			int curI = xAngleOffset < 0 ? (width - 1) - i : i;
+			int curJ = yAngleOffset < 0 ? (height - 1) - j : j;
 
 			int xPosAngleOffset = xAngleOffset;
 			int yPosAngleOffset = yAngleOffset;
@@ -76,10 +77,10 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 			xAngleOffset = val.at(val.begin() + 0);
 			yAngleOffset = val.at(val.begin() + 1);*/
 
-			int currentXPos = i + (((engine.player->pos.w + (tempMOffX * -xAngleOffset) - (width / 2)) - xAngleOffsetTrunc)+1);
-			int currentYPos = j + (((engine.player->pos.h + (tempMOffY * -yAngleOffset) - (height / 2)) - yAngleOffsetTrunc)+1);
+			int currentXPos = i + (((engine.player->pos.x + (tempMOffX * -xAngleOffset) - (width / 2)) - xAngleOffsetTrunc) + 1);
+			int currentYPos = j + (((engine.player->pos.y + (tempMOffY * -yAngleOffset) - (height / 2)) - yAngleOffsetTrunc) + 1);
 
-			Map::Pos curPosition(currentXPos, currentYPos, engine.player->pos.d + 1);
+			Map::Pos curPosition(currentXPos, currentYPos, engine.player->pos.z + 1);
 
 			bool hasCharacter = false;
 
@@ -96,16 +97,48 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 			int depth = 0;
 
 			std::shared_ptr<Entity> foundNPC = nullptr;
-			for (int z = curPosition.d; z >= 0; z--) {
+
+			TCODColor bg = TCODColor::black;
+			TCODColor color = TCODColor::black;
+
+			bool hasNPC = false;
+			char npcChar = ' ';
+			TCODColor npcColor = TCODColor::white;
+
+			for (auto &e : engine.npcs) {
+				if (e->pos.x == curPosition.x && e->pos.y == curPosition.y && e->pos.z > engine.player->pos.z) {
+					hasNPC = true;
+					npcColor = TCODColor::blue;
+					npcChar = '!';
+				}
+			}
+			int ZAxis = curPosition.z;
+			for (int z = curPosition.z; z >= 0; z--) {
 				bool stopLoop = false;
+				float posAngle = atan2f(
+					curPosition.x - engine.player->pos.x, 
+					curPosition.y - engine.player->pos.y
+				);
 
-				curPosition = curPosition + Map::Pos(xAngleOffset, yAngleOffset, -1);
+				float posDistance = sqrt(pow(curPosition.x - engine.player->pos.x, 2) 
+					+ pow(curPosition.y - engine.player->pos.y, 2)
+					/*+ pow(curPosition.z - engine.player->pos.z, 2)*/);
+				
 
-				bool hasNPC = false;
+
+				int xOffsetPosition = sin(posAngle) * ((ZAxis - (z + 1))/2.5)/* * (posDistance/20)*/;
+
+				int yOffsetPosition = cos(posAngle) * ((ZAxis - (z + 1))/2.5)/* * (posDistance/20)*/;
+
+				curPosition = curPosition + Map::Pos(xOffsetPosition, yOffsetPosition, -1);
 
 				for (auto &e : engine.npcs) {
 					if (e->pos == curPosition) {
 						foundNPC = e;
+
+						npcColor = e->col;
+						npcChar = e->c;
+						hasNPC = true;
 
 						//drawFullCharacter(width - xDrawPosition, height - yDrawPosition, e->c, col, TCODColor::black);
 						/*hasCharacter = true;
@@ -114,18 +147,15 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 					}
 				}
 
-				if (hasNPC)
-					break;
-				/*if (depth > 10)
+				/*if (hasNPC)
 					break;*/
+					/*if (depth > 10)
+						break;*/
 
 				Tile * curTile = engine.map->GetTileAt(curPosition);
 				Ground * curGround = engine.map->GetGroundAt(curPosition);
 
 				char c = ' ';
-
-				TCODColor bg = TCODColor::white;
-				TCODColor color = TCODColor::white;
 
 				bool hasGround = false;
 
@@ -151,29 +181,29 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 						bg = curTile->bg;
 						color = curTile->color;
 
-						/*if (!topTile && leftTile && forwardTile && curPosition.d != engine.player->pos.d) {
+						/*if (!topTile && leftTile && forwardTile && curPosition.z != engine.player->pos.z) {
 							c = '\\';
 							color = bg;
 							color.setValue(color.getValue() * 1.3f);
 						}
-						else if (!topTile && !leftTile && !forwardTile && curPosition.d != engine.player->pos.d) {
+						else if (!topTile && !leftTile && !forwardTile && curPosition.z != engine.player->pos.z) {
 							c = '\\';
 							color = bg;
 							color.setValue(color.getValue() * 0.7f);
 						}*/
-						if (curPosition.d != engine.player->pos.d && (!topTile && leftTile && forwardTile && !rightTile && !backwardTile)) {
+						if (curPosition.z != engine.player->pos.z && (!topTile && leftTile && forwardTile && !rightTile && !backwardTile)) {
 							c = '\\';
 							color.setValue(color.getValue() * 1.3f);
 						}
-						else if (curPosition.d != engine.player->pos.d && (!topTile && !leftTile && !forwardTile && rightTile && backwardTile)) {
+						else if (curPosition.z != engine.player->pos.z && (!topTile && !leftTile && !forwardTile && rightTile && backwardTile)) {
 							c = '\\';
 							color.setValue(color.getValue() * 1.3f);
 						}
-						else if (curPosition.d != engine.player->pos.d && (!topTile && !leftTile && forwardTile && rightTile && !backwardTile)) {
+						else if (curPosition.z != engine.player->pos.z && (!topTile && !leftTile && forwardTile && rightTile && !backwardTile)) {
 							c = '\\';
 							color.setValue(color.getValue() * 1.3f);
 						}
-						else if (curPosition.d != engine.player->pos.d && (!topTile && leftTile && !forwardTile && !rightTile && backwardTile)) {
+						else if (curPosition.z != engine.player->pos.z && (!topTile && leftTile && !forwardTile && !rightTile && backwardTile)) {
 							c = '\\';
 							color.setValue(color.getValue() * 1.3f);
 						}
@@ -226,8 +256,6 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 				}
 				depth++;
 
-
-
 				float bgH, bgS, bgV;
 				float curH, curS, curV;
 				bg.getHSV(&bgH, &bgS, &bgV);
@@ -247,15 +275,15 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 					sqrt(curBGVal / (depth * 0.9))
 				);
 
-				if (foundNPC != nullptr){
-					curCLHue = foundNPC->col.getHue();
-					curCLSat = foundNPC->col.getSaturation();
-					curCLVal = foundNPC->col.getValue();
+				if (hasNPC) {
+					curCLHue = npcColor.getHue();
+					curCLSat = npcColor.getSaturation();
+					curCLVal = npcColor.getValue();
 
-					c = foundNPC->c;
+					c = npcChar;
 				}
 
-				if (hasGround && stopLoop && z == engine.player->pos.d + 1) {
+				if (hasGround && stopLoop && z == engine.player->pos.z + 1) {
 					c = '#';
 					color = TCODColor::white;
 					float h, s, v;
@@ -272,21 +300,310 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 					sqrt(curCLVal / (depth * 0.9))
 				);
 
-				bg.r = (pow(((float)bg.r / 255), (1 / 2.2))) * 255;
-				bg.g = (pow(((float)bg.g / 255), (1 / 2.2))) * 255;
-				bg.b = (pow(((float)bg.b / 255), (1 / 2.2))) * 255;
+				if (stopLoop) {
 
-				color.r = (pow(((float)color.r / 255), (1 / 2.2))) * 255;
-				color.g = (pow(((float)color.g / 255), (1 / 2.2))) * 255;
-				color.b = (pow(((float)color.b / 255), (1 / 2.2))) * 255;
+					bg.r = (pow(((float)bg.r / 255), (1 / 2.2))) * 255;
+					bg.g = (pow(((float)bg.g / 255), (1 / 2.2))) * 255;
+					bg.b = (pow(((float)bg.b / 255), (1 / 2.2))) * 255;
 
-				drawFullCharacter(width - xDrawPosition, height - yDrawPosition, c, color, bg);
+					color.r = (pow(((float)color.r / 255), (1 / 2.2))) * 255;
+					color.g = (pow(((float)color.g / 255), (1 / 2.2))) * 255;
+					color.b = (pow(((float)color.b / 255), (1 / 2.2))) * 255;
 
-				if (stopLoop)
+					if (!hasNPC)
+						drawFullCharacter(width - xDrawPosition, height - yDrawPosition, c, color, bg);
+					else
+						drawFullCharacter(width - xDrawPosition, height - yDrawPosition, npcChar, npcColor, bg);
+
+
 					break;
+				}
 			}
-		}																				 
-	}																					 
+		}
+	}
+}
+
+void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int height) {
+	for (int j = 0; j < height; j++) {
+		for (int i = 0; i < width; i++) {	
+
+			int xAngleOffset, yAngleOffset;
+
+			switch (angle) {
+			case 0: //NORTH
+				xAngleOffset = -1;
+				yAngleOffset = -1;
+				break;
+			case 1: //EAST
+				xAngleOffset = 1;
+				yAngleOffset = -1;
+				break;
+			case 2: //SOUTH
+				xAngleOffset = 1;
+				yAngleOffset = 1;
+				break;
+			case 3: //WEST
+				xAngleOffset = -1;
+				yAngleOffset = 1;
+				break;
+			}
+
+			int xAngleOffsetTrunc = xAngleOffset < 0 ? 0 : 1;
+			int yAngleOffsetTrunc = yAngleOffset < 0 ? 0 : 1;
+
+			int curI = xAngleOffset < 0 ? (width-1) - i : i;
+			int curJ = yAngleOffset < 0 ? (height-1) - j : j;
+
+			int xPosAngleOffset = xAngleOffset;
+			int yPosAngleOffset = yAngleOffset;
+
+			int tempMOffX = mOffX;
+			int tempMOffY = mOffY;
+
+			if (xAngleOffset >= 0 != yAngleOffset >= 0) {
+				std::swap(curI, curJ);
+				//std::swap(xPosAngleOffset, yPosAngleOffset);
+				std::swap(tempMOffX, tempMOffY);
+			}
+
+			int xDrawPosition = curI;
+			int yDrawPosition = curJ;
+
+			/*auto val = GetAngles(angle);
+			xAngleOffset = val.at(val.begin() + 0);
+			yAngleOffset = val.at(val.begin() + 1);*/
+
+			int currentXPos = i + (((engine.player->pos.x + (tempMOffX * -xAngleOffset) - (width / 2)) - xAngleOffsetTrunc)+1);
+			int currentYPos = j + (((engine.player->pos.y + (tempMOffY * -yAngleOffset) - (height / 2)) - yAngleOffsetTrunc)+1);
+
+			Map::Pos curPosition(currentXPos, currentYPos, engine.player->pos.z + 1);
+
+			bool hasCharacter = false;
+
+			float totalHue = 0.0f;
+			float totalSat = 0.0f;
+			float totalVal = 0.0f;
+
+			float totalCharHue = 0.0f;
+			float totalCharSat = 0.0f;
+			float totalCharVal = 0.0f;
+
+			float totalBlocks = 0;
+
+			int depth = 0;
+
+			std::shared_ptr<Entity> foundNPC = nullptr;
+
+			TCODColor bg = TCODColor::black;
+			TCODColor color = TCODColor::black;
+
+			bool hasNPC = false;
+			char npcChar = ' ';
+			TCODColor npcColor = TCODColor::white;
+
+			for (auto &e : engine.npcs) {
+				if (e->pos.x == curPosition.x && e->pos.y == curPosition.y && e->pos.z > engine.player->pos.z) {
+					hasNPC = true;
+					npcColor = TCODColor::blue;
+					npcChar = '!';
+				}
+			}
+				
+				for (int z = curPosition.z; z >= 0; z--) {
+					bool stopLoop = false;
+
+					curPosition = curPosition + Map::Pos(xAngleOffset, yAngleOffset, -1);
+
+					for (auto &e : engine.npcs) {
+						if (e->pos == curPosition) {
+							foundNPC = e;
+
+							npcColor = e->col;
+							npcChar = e->c;
+							hasNPC = true;
+
+							//drawFullCharacter(width - xDrawPosition, height - yDrawPosition, e->c, col, TCODColor::black);
+							/*hasCharacter = true;
+							hasNPC = true;*/
+							break;
+						}
+					}
+
+					/*if (hasNPC)
+						break;*/
+					/*if (depth > 10)
+						break;*/
+
+					Tile * curTile = engine.map->GetTileAt(curPosition);
+					Ground * curGround = engine.map->GetGroundAt(curPosition);
+
+					char c = ' ';
+
+					bool hasGround = false;
+
+					if (curTile != NULL) {
+						if (curTile->type == Tile::empty) {
+							depth++;
+						}
+						else if (!curTile->isTransparent) {
+
+							bool topTile = engine.map->GetTileAt(curPosition + Map::Pos(0, 0, 1)) != nullptr &&
+								engine.map->GetTileAt(curPosition + Map::Pos(0, 0, 1))->type != Tile::wall &&
+								engine.map->GetGroundAt(curPosition + Map::Pos(0, 0, 1)) != nullptr &&
+								engine.map->GetGroundAt(curPosition + Map::Pos(0, 0, 1))->type != Ground::wall;
+							bool leftTile = engine.map->GetTileAt(curPosition + Map::Pos(-xAngleOffset, 0, 0)) != nullptr &&
+								engine.map->GetTileAt(curPosition + Map::Pos(-xAngleOffset, 0, 0))->type != Tile::wall;
+							bool forwardTile = engine.map->GetTileAt(curPosition + Map::Pos(0, -yAngleOffset, 0)) != nullptr &&
+								engine.map->GetTileAt(curPosition + Map::Pos(0, -yAngleOffset, 0))->type != Tile::wall;
+							bool rightTile = engine.map->GetTileAt(curPosition + Map::Pos(xAngleOffset, 0, 0)) != nullptr &&
+								engine.map->GetTileAt(curPosition + Map::Pos(xAngleOffset, 0, 0))->type != Tile::wall;
+							bool backwardTile = engine.map->GetTileAt(curPosition + Map::Pos(0, yAngleOffset, 0)) != nullptr &&
+								engine.map->GetTileAt(curPosition + Map::Pos(0, yAngleOffset, 0))->type != Tile::wall;
+
+							bg = curTile->bg;
+							color = curTile->color;
+
+							/*if (!topTile && leftTile && forwardTile && curPosition.z != engine.player->pos.z) {
+								c = '\\';
+								color = bg;
+								color.setValue(color.getValue() * 1.3f);
+							}
+							else if (!topTile && !leftTile && !forwardTile && curPosition.z != engine.player->pos.z) {
+								c = '\\';
+								color = bg;
+								color.setValue(color.getValue() * 0.7f);
+							}*/
+							if (curPosition.z != engine.player->pos.z && (!topTile && leftTile && forwardTile && !rightTile && !backwardTile)) {
+								c = '\\';
+								color.setValue(color.getValue() * 1.3f);
+							}
+							else if (curPosition.z != engine.player->pos.z && (!topTile && !leftTile && !forwardTile && rightTile && backwardTile)) {
+								c = '\\';
+								color.setValue(color.getValue() * 1.3f);
+							}
+							else if (curPosition.z != engine.player->pos.z && (!topTile && !leftTile && forwardTile && rightTile && !backwardTile)) {
+								c = '\\';
+								color.setValue(color.getValue() * 1.3f);
+							}
+							else if (curPosition.z != engine.player->pos.z && (!topTile && leftTile && !forwardTile && !rightTile && backwardTile)) {
+								c = '\\';
+								color.setValue(color.getValue() * 1.3f);
+							}
+							else {
+								c = curTile->c;
+							}
+
+							hasGround = true;
+							stopLoop = true;
+
+						}
+						else {
+							bg = curTile->bg;
+							color = curTile->color;
+
+							//drawFullCharacter(width - xDrawPosition, height - yDrawPosition, c, color, bg);
+							//hasGround = true;
+
+							totalBlocks += curTile->transparencyStepSize;
+
+							float bgH, bgS, bgV;
+							float curH, curS, curV;
+
+							bg.getHSV(&bgH, &bgS, &bgV);
+							color.getHSV(&curH, &curS, &curV);
+
+							totalHue += bgH * curTile->transparencyStepSize;
+							totalSat += bgS * curTile->transparencyStepSize;
+							totalVal += bgV * curTile->transparencyStepSize;
+
+							totalCharHue += curH * curTile->transparencyStepSize;
+							totalCharSat += curS * curTile->transparencyStepSize;
+							totalCharVal += curV * curTile->transparencyStepSize;
+						}
+					}
+
+					if (curGround != NULL && !hasGround) {
+						if (curGround->type != Ground::empty) {
+							bg = curGround->bg;
+							color = curGround->color;
+							//color = TCODColor::lerp(bg, color, 0.75f);
+							c = curGround->c;
+							stopLoop = true;
+
+						}
+					}
+					else if (curGround == NULL) {
+
+						stopLoop = true;
+					}
+					depth++;
+
+					float bgH, bgS, bgV;
+					float curH, curS, curV;
+					bg.getHSV(&bgH, &bgS, &bgV);
+					color.getHSV(&curH, &curS, &curV);
+
+					float curBGHue = ((bgH + totalHue) / (totalBlocks + 1));
+					float curBGSat = ((bgS + totalSat) / (totalBlocks + 1));
+					float curBGVal = ((bgV + totalVal) / (totalBlocks + 1));
+
+					float curCLHue = ((curH + totalCharHue) / (totalBlocks + 1));
+					float curCLSat = ((curS + totalCharSat) / (totalBlocks + 1));
+					float curCLVal = ((curV + totalCharVal) / (totalBlocks + 1));
+
+					bg.setHSV(
+						curBGHue,
+						curBGSat,
+						sqrt(curBGVal / (depth * 0.9))
+					);
+
+					if (hasNPC){
+						curCLHue = npcColor.getHue();
+						curCLSat = npcColor.getSaturation();
+						curCLVal = npcColor.getValue();
+
+						c = npcChar;
+					}
+
+					if (hasGround && stopLoop && z == engine.player->pos.z + 1) {
+						c = '#';
+						color = TCODColor::white;
+						float h, s, v;
+						color.getHSV(&h, &s, &v);
+
+						curCLHue = (h + curBGHue) / 2;
+						curCLSat = (s + curBGSat) / 2;
+						curCLVal = (v + curBGVal) / 2;
+					}
+
+					color.setHSV(
+						curCLHue,
+						curCLSat,
+						sqrt(curCLVal / (depth * 0.9))
+					);
+
+					if (stopLoop) {
+
+						bg.r = (pow(((float)bg.r / 255), (1 / 2.2))) * 255;
+						bg.g = (pow(((float)bg.g / 255), (1 / 2.2))) * 255;
+						bg.b = (pow(((float)bg.b / 255), (1 / 2.2))) * 255;
+
+						color.r = (pow(((float)color.r / 255), (1 / 2.2))) * 255;
+						color.g = (pow(((float)color.g / 255), (1 / 2.2))) * 255;
+						color.b = (pow(((float)color.b / 255), (1 / 2.2))) * 255;
+
+						if (!hasNPC) 
+							drawFullCharacter(width - xDrawPosition, height - yDrawPosition, c, color, bg);
+						else 
+							drawFullCharacter(width - xDrawPosition, height - yDrawPosition, npcChar, npcColor, bg);
+						
+						
+						break;
+					}
+				}
+			}																				 
+		}	
+	
 }																						 
 																						 
 void EngineRenderer::renderMapOLD(int mOffX, int mOffY, int angle) {
@@ -346,7 +663,7 @@ void EngineRenderer::renderMapOLD(int mOffX, int mOffY, int angle) {
 			//Let's keep this here so that the code get's smaller.
 			//Essentially just getting the position of the engine.player, and drawing everything 32 tiles to the left of him (assuming he is on the center of a screen 64x64).
 			//This will serve to make the rest of the code more readable
-			Map::Pos currentPosition(engine.player->pos.w + (i)+mOffX - 31, engine.player->pos.h + (j)+mOffY - 31, engine.player->pos.d);
+			Map::Pos currentPosition(engine.player->pos.x + (i)+mOffX - 31, engine.player->pos.y + (j)+mOffY - 31, engine.player->pos.z);
 
 			TCODColor effColor = TCODColor::white;
 			TCODColor effBackground = TCODColor::white;
@@ -371,7 +688,7 @@ void EngineRenderer::renderMapOLD(int mOffX, int mOffY, int angle) {
 			bool hasNPC = false;
 
 			for (auto &e : engine.npcs) {
-				if (e->pos.w == currentPosition.w && e->pos.h == currentPosition.h && e->pos.d == currentPosition.d) {
+				if (e->pos.x == currentPosition.x && e->pos.y == currentPosition.y && e->pos.z == currentPosition.z) {
 					hasNPC = true;
 					TCODConsole::root->setCharForeground(curI + 1, curJ + 1, e->col);
 					TCODConsole::root->setChar(curI + 1, curJ + 1, e->c);
@@ -385,9 +702,9 @@ void EngineRenderer::renderMapOLD(int mOffX, int mOffY, int angle) {
 
 			//We are going to start on top and slowly go down
 			if (!hasNPC) {
-				for (int z = engine.player->pos.d; z > -1; --z) {
+				for (int z = engine.player->pos.z; z > -1; --z) {
 					for (auto &e : engine.npcs) {
-						if (depth > 0 && e->pos.w == currentPosition.w - (depth * rotateX) + 1 && e->pos.h == currentPosition.h - (depth * rotateY) + 1 && e->pos.d == currentPosition.d - depth) {
+						if (depth > 0 && e->pos.x == currentPosition.x - (depth * rotateX) + 1 && e->pos.y == currentPosition.y - (depth * rotateY) + 1 && e->pos.z == currentPosition.z - depth) {
 							hasNPC = true;
 							TCODColor base = e->col;
 							base.setValue(sqrt((base.getValue()) / (depth + 1)));
@@ -401,11 +718,11 @@ void EngineRenderer::renderMapOLD(int mOffX, int mOffY, int angle) {
 						break;
 
 					//Let's make sure we are looking at the right tile
-					Map::Pos newPosition((currentPosition.w - (depth * rotateX)) + rotateX, (currentPosition.h - (depth * rotateY)) + rotateY, currentPosition.d - depth);
+					Map::Pos newPosition((currentPosition.x - (depth * rotateX)) + rotateX, (currentPosition.y - (depth * rotateY)) + rotateY, currentPosition.z - depth);
 
 
-					if (z >= engine.player->pos.d - 1)
-						newPosition = Map::Pos(currentPosition.w, currentPosition.h, currentPosition.d - depth);
+					if (z >= engine.player->pos.z - 1)
+						newPosition = Map::Pos(currentPosition.x, currentPosition.y, currentPosition.z - depth);
 
 
 					Tile * currentTile = engine.map->GetTileAt(newPosition);
@@ -434,10 +751,10 @@ void EngineRenderer::renderMapOLD(int mOffX, int mOffY, int angle) {
 
 
 					//Let's try to fix some edges
-					Tile * blockingTile = engine.map->GetTileAt(newPosition.w + rotateX, newPosition.h + rotateY, newPosition.d);
+					Tile * blockingTile = engine.map->GetTileAt(newPosition.x + rotateX, newPosition.y + rotateY, newPosition.z);
 
 					//I can only fix edges on the bottom layers
-					if (!isGround && z < engine.player->pos.d - 1 && depth != 0 && blockingTile != nullptr) {
+					if (!isGround && z < engine.player->pos.z - 1 && depth != 0 && blockingTile != nullptr) {
 
 						//I give priority to any tile to the bottom and right of the current block
 						if (blockingTile->type == Tile::wall) {
@@ -445,8 +762,8 @@ void EngineRenderer::renderMapOLD(int mOffX, int mOffY, int angle) {
 						}
 						else {
 							//Then I pick either the one to the right, or bottom. If both are just air, then the tile is clearly visible.
-							Tile * eastTile = engine.map->GetTileAt(newPosition.w + rotateX, newPosition.h, newPosition.d);
-							Tile * southTile = engine.map->GetTileAt(newPosition.w, newPosition.h + rotateY, newPosition.d);
+							Tile * eastTile = engine.map->GetTileAt(newPosition.x + rotateX, newPosition.y, newPosition.z);
+							Tile * southTile = engine.map->GetTileAt(newPosition.x, newPosition.y + rotateY, newPosition.z);
 							if (eastTile != nullptr && southTile != nullptr) {
 								if (eastTile->type == Tile::wall)
 									currentTile = eastTile;
@@ -490,9 +807,9 @@ void EngineRenderer::renderMapOLD(int mOffX, int mOffY, int angle) {
 
 						//Continuing the ray downwards
 						//Grabbing all the colors along the way and averaging (probably not the correct way to do it)
-						for (int g = engine.player->pos.d - depth; g > -1; --g) {
+						for (int g = engine.player->pos.z - depth; g > -1; --g) {
 							iter++;
-							Tile * currentTile = map->GetTileAt(newPosition.w - iter, newPosition.h - iter, newPosition.d - iter);
+							Tile * currentTile = map->GetTileAt(newPosition.x - iter, newPosition.y - iter, newPosition.z - iter);
 							if (currentTile != nullptr) {
 								//We get the color of anything except air
 								if (currentTile->type != Tile::empty) {
@@ -566,7 +883,7 @@ void EngineRenderer::renderMapOLD(int mOffX, int mOffY) {
 			//Let's keep this here so that the code get's smaller.
 			//Essentially just getting the position of the player, and drawing everything 32 tiles to the left of him (assuming he is on the center of a screen 64x64).
 			//This will serve to make the rest of the code more readable
-			Map::Pos currentPosition(engine.player->pos.w + i + mOffX - 31, engine.player->pos.h + j + mOffY - 31, engine.player->pos.d);
+			Map::Pos currentPosition(engine.player->pos.x + i + mOffX - 31, engine.player->pos.y + j + mOffY - 31, engine.player->pos.z);
 
 			TCODColor effColor = TCODColor::white;
 			TCODColor effBackground = TCODColor::white;
@@ -591,7 +908,7 @@ void EngineRenderer::renderMapOLD(int mOffX, int mOffY) {
 			bool hasNPC = false;
 
 			for (auto &e : engine.npcs) {
-				if (e->pos.w == currentPosition.w && e->pos.h == currentPosition.h && e->pos.d == currentPosition.d) {
+				if (e->pos.x == currentPosition.x && e->pos.y == currentPosition.y && e->pos.z == currentPosition.z) {
 					hasNPC = true;
 					TCODConsole::root->setCharForeground(i + 1, j + 1, e->col);
 					TCODConsole::root->setChar(i + 1, j + 1, e->c);
@@ -605,9 +922,9 @@ void EngineRenderer::renderMapOLD(int mOffX, int mOffY) {
 
 			//We are going to start on top and slowly go down
 			if (!hasNPC) {
-				for (int z = engine.player->pos.d; z > -1; --z) {
+				for (int z = engine.player->pos.z; z > -1; --z) {
 					for (auto &e : engine.npcs) {
-						if (depth > 0 && e->pos.w == currentPosition.w - depth + 1 && e->pos.h == currentPosition.h - depth + 1 && e->pos.d == currentPosition.d - depth) {
+						if (depth > 0 && e->pos.x == currentPosition.x - depth + 1 && e->pos.y == currentPosition.y - depth + 1 && e->pos.z == currentPosition.z - depth) {
 							hasNPC = true;
 							TCODColor base = e->col;
 							base.setValue(sqrt((base.getValue()) / (depth + 1)));
@@ -621,10 +938,10 @@ void EngineRenderer::renderMapOLD(int mOffX, int mOffY) {
 						break;
 
 					//Let's make sure we are looking at the right tile
-					Map::Pos newPosition(currentPosition.w - depth + 1, currentPosition.h - depth + 1, currentPosition.d - depth);
+					Map::Pos newPosition(currentPosition.x - depth + 1, currentPosition.y - depth + 1, currentPosition.z - depth);
 
-					if (z >= engine.player->pos.d - 1)
-						newPosition = Map::Pos(currentPosition.w, currentPosition.h, currentPosition.d - depth);
+					if (z >= engine.player->pos.z - 1)
+						newPosition = Map::Pos(currentPosition.x, currentPosition.y, currentPosition.z - depth);
 
 
 					Tile * currentTile = engine.map->GetTileAt(newPosition);
@@ -653,10 +970,10 @@ void EngineRenderer::renderMapOLD(int mOffX, int mOffY) {
 
 
 					//Let's try to fix some edges
-					Tile * blockingTile = engine.map->GetTileAt(newPosition.w + 1, newPosition.h + 1, newPosition.d);
+					Tile * blockingTile = engine.map->GetTileAt(newPosition.x + 1, newPosition.y + 1, newPosition.z);
 
 					//I can only fix edges on the bottom layers
-					if (!isGround && z < engine.player->pos.d - 1 && depth != 0 && blockingTile != nullptr) {
+					if (!isGround && z < engine.player->pos.z - 1 && depth != 0 && blockingTile != nullptr) {
 
 						//I give priority to any tile to the bottom and right of the current block
 						if (blockingTile->type == Tile::wall) {
@@ -664,8 +981,8 @@ void EngineRenderer::renderMapOLD(int mOffX, int mOffY) {
 						}
 						else {
 							//Then I pick either the one to the right, or bottom. If both are just air, then the tile is clearly visible.
-							Tile * eastTile = engine.map->GetTileAt(newPosition.w + 1, newPosition.h, newPosition.d);
-							Tile * southTile = engine.map->GetTileAt(newPosition.w, newPosition.h + 1, newPosition.d);
+							Tile * eastTile = engine.map->GetTileAt(newPosition.x + 1, newPosition.y, newPosition.z);
+							Tile * southTile = engine.map->GetTileAt(newPosition.x, newPosition.y + 1, newPosition.z);
 							if (eastTile != nullptr && southTile != nullptr) {
 								if (eastTile->type == Tile::wall)
 									currentTile = eastTile;
@@ -709,9 +1026,9 @@ void EngineRenderer::renderMapOLD(int mOffX, int mOffY) {
 
 						//Continuing the ray downwards
 						//Grabbing all the colors along the way and averaging (probably not the correct way to do it)
-						for (int g = player->pos.d - depth; g > -1; --g) {
+						for (int g = player->pos.z - depth; g > -1; --g) {
 							iter++;
-							Tile * currentTile = map->GetTileAt(newPosition.w - iter, newPosition.h - iter, newPosition.d - iter);
+							Tile * currentTile = map->GetTileAt(newPosition.x - iter, newPosition.y - iter, newPosition.z - iter);
 							if (currentTile != nullptr) {
 								//We get the color of anything except air
 								if (currentTile->type != Tile::empty) {
@@ -782,20 +1099,20 @@ void EngineRenderer::renderMapInverted() {
 			//Let's keep this here so that the code get's smaller.
 			//Essentially just getting the position of the player, and drawing everything 32 tiles to the left of him (assuming he is on the center of a screen 64x64).
 			//This will serve to make the rest of the code more readable
-			Map::Pos currentPosition(player->pos.w - i + 32, player->pos.h - j + 32, player->pos.d);
+			Map::Pos currentPosition(player->pos.x - i + 32, player->pos.y - j + 32, player->pos.z);
 
 			//Let's start raycasting down, trying to find the first possible tile we can work with
 			//This keeps how far down we went.
 			int depth = 0;
 
 			//We are going to start on top and slowly go down
-			for (int z = player->pos.d; z > -1; --z) {
+			for (int z = player->pos.z; z > -1; --z) {
 
 				//Let's make sure we are looking at the right tile
-				Map::Pos newPosition(currentPosition.w + depth + 1, currentPosition.h + depth + 1, currentPosition.d - depth);
+				Map::Pos newPosition(currentPosition.x + depth + 1, currentPosition.y + depth + 1, currentPosition.z - depth);
 
-				if (z >= player->pos.d - 1) {
-					newPosition = Map::Pos(currentPosition.w, currentPosition.h, currentPosition.d - depth);
+				if (z >= player->pos.z - 1) {
+					newPosition = Map::Pos(currentPosition.x, currentPosition.y, currentPosition.z - depth);
 				}
 
 				Tile * currentTile = map->GetTileAt(newPosition);
@@ -812,10 +1129,10 @@ void EngineRenderer::renderMapInverted() {
 				}
 
 				//Let's try to fix some edges
-				Tile * blockingTile = map->GetTileAt(newPosition.w - 1, newPosition.h - 1, newPosition.d);
+				Tile * blockingTile = map->GetTileAt(newPosition.x - 1, newPosition.y - 1, newPosition.z);
 
 				//I can only fix edges on the bottom layers
-				if (z < player->pos.d - 1 && depth != 0 && blockingTile != nullptr) {
+				if (z < player->pos.z - 1 && depth != 0 && blockingTile != nullptr) {
 
 					//I give priority to any tile to the bottom and right of the current block
 					if (blockingTile->type == Tile::wall) {
@@ -823,8 +1140,8 @@ void EngineRenderer::renderMapInverted() {
 					}
 					else {
 						//Then I pick either the one to the right, or bottom. If both are just air, then the tile is clearly visible.
-						Tile * eastTile = map->GetTileAt(newPosition.w - 1, newPosition.h, newPosition.d);
-						Tile * southTile = map->GetTileAt(newPosition.w, newPosition.h - 1, newPosition.d);
+						Tile * eastTile = map->GetTileAt(newPosition.x - 1, newPosition.y, newPosition.z);
+						Tile * southTile = map->GetTileAt(newPosition.x, newPosition.y - 1, newPosition.z);
 						if (eastTile != nullptr && southTile != nullptr) {
 							if (eastTile->type == Tile::wall)
 								currentTile = eastTile;
@@ -857,9 +1174,9 @@ void EngineRenderer::renderMapInverted() {
 
 					//Continuing the ray downwards
 					//Grabbing all the colors along the way and averaging (probably not the correct way to do it)
-					for (int g = player->pos.d - depth; g > -1; --g) {
+					for (int g = player->pos.z - depth; g > -1; --g) {
 						iter++;
-						Tile * currentTile = map->GetTileAt(newPosition.w + iter, newPosition.h + iter, newPosition.d - iter);
+						Tile * currentTile = map->GetTileAt(newPosition.x + iter, newPosition.y + iter, newPosition.z - iter);
 						if (currentTile != nullptr) {
 							//We get the color of anything except air
 							if (currentTile->type != Tile::empty) {
@@ -929,20 +1246,20 @@ void EngineRenderer::renderMapZoomedOut() {
 			//Let's keep this here so that the code get's smaller.
 			//Essentially just getting the position of the player, and drawing everything 32 tiles to the left of him (assuming he is on the center of a screen 64x64).
 			//This will serve to make the rest of the code more readable
-			Map::Pos currentPosition(player->pos.w + (i*4) - 128, player->pos.h + (j * 4) - 128, player->pos.d);
+			Map::Pos currentPosition(player->pos.x + (i*4) - 128, player->pos.y + (j * 4) - 128, player->pos.z);
 
 			//Let's start raycasting down, trying to find the first possible tile we can work with
 			//This keeps how far down we went.
 			int depth = 0;
 
 			//We are going to start on top and slowly go down
-			for (int z = player->pos.d; z > -1; --z) {
+			for (int z = player->pos.z; z > -1; --z) {
 
 				//Let's make sure we are looking at the right tile
-				Map::Pos newPosition(currentPosition.w - depth + 1, currentPosition.h - depth + 1, currentPosition.d - depth);
+				Map::Pos newPosition(currentPosition.x - depth + 1, currentPosition.y - depth + 1, currentPosition.z - depth);
 
-				if (z >= player->pos.d - 1) {
-					newPosition = Map::Pos(currentPosition.w, currentPosition.h, currentPosition.d - depth);
+				if (z >= player->pos.z - 1) {
+					newPosition = Map::Pos(currentPosition.x, currentPosition.y, currentPosition.z - depth);
 				}
 
 				Tile * currentTile = map->GetTileAt(newPosition);
@@ -959,10 +1276,10 @@ void EngineRenderer::renderMapZoomedOut() {
 				}
 
 				//Let's try to fix some edges
-				Tile * blockingTile = map->GetTileAt(newPosition.w + 1, newPosition.h + 1, newPosition.d);
+				Tile * blockingTile = map->GetTileAt(newPosition.x + 1, newPosition.y + 1, newPosition.z);
 
 				//I can only fix edges on the bottom layers
-				if (z < player->pos.d - 1 && depth != 0 && blockingTile != nullptr) {
+				if (z < player->pos.z - 1 && depth != 0 && blockingTile != nullptr) {
 
 					//I give priority to any tile to the bottom and right of the current block
 					if (blockingTile->type == Tile::wall) {
@@ -970,8 +1287,8 @@ void EngineRenderer::renderMapZoomedOut() {
 					}
 					else {
 						//Then I pick either the one to the right, or bottom. If both are just air, then the tile is clearly visible.
-						Tile * eastTile = map->GetTileAt(newPosition.w + 1, newPosition.h, newPosition.d);
-						Tile * southTile = map->GetTileAt(newPosition.w, newPosition.h + 1, newPosition.d);
+						Tile * eastTile = map->GetTileAt(newPosition.x + 1, newPosition.y, newPosition.z);
+						Tile * southTile = map->GetTileAt(newPosition.x, newPosition.y + 1, newPosition.z);
 						if (eastTile != nullptr && southTile != nullptr) {
 							if (eastTile->type == Tile::wall)
 								currentTile = eastTile;
@@ -1004,9 +1321,9 @@ void EngineRenderer::renderMapZoomedOut() {
 
 					//Continuing the ray downwards
 					//Grabbing all the colors along the way and averaging (probably not the correct way to do it)
-					for (int g = player->pos.d - depth; g > -1; --g) {
+					for (int g = player->pos.z - depth; g > -1; --g) {
 						iter++;
-						Tile * currentTile = map->GetTileAt(newPosition.w - iter, newPosition.h - iter, newPosition.d - iter);
+						Tile * currentTile = map->GetTileAt(newPosition.x - iter, newPosition.y - iter, newPosition.z - iter);
 						if (currentTile != nullptr) {
 							//We get the color of anything except air
 							if (currentTile->type != Tile::empty) {

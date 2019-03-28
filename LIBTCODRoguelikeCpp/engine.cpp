@@ -24,6 +24,7 @@ Engine::Engine()
 	player->ren = std::make_shared<WorldBuilderRenderer>();*/
 	player->ai = std::make_shared<PlayerAi>();
 	player->inv = std::make_shared<PlayerInventory>();
+	player->meta = std::make_shared<Metabolism>(player);
 
 	for (int i = 0; i < itemManager.items.size(); i++) {
 		player->inv->item_vector.push_back(std::make_pair(i, 5));
@@ -31,15 +32,24 @@ Engine::Engine()
 
 	for (int i = 0; i < map->depth; i++) {
 		if (map->GetTileAt(128, 128, i)->type != TileManager::tile_wall) {
-			player->pos.d = i;
-			player->pos.w = 128;
-			player->pos.h = 128;
+			player->pos.z = i;
+			player->pos.x = 128;
+			player->pos.y = 128;
 			break;
 		}
 	}
 
 	for (auto &e : npcs) {
 		e->pos = player->pos;
+		e->pos.x += 10;
+		e->pos.y += 10;
+
+		for (int i = 0; i < map->depth; i++) {
+			if (map->GetTileAt(e->pos.x, e->pos.y, i)->type != TileManager::tile_wall) {
+				e->pos.z = i;
+				break;
+			}
+		}
 	}
 
 
@@ -70,6 +80,18 @@ void Engine::init()
 
 void Engine::render()
 {
+	switch (curScene) {
+	case playing:
+		playingRender();
+		break;
+	case gameover:
+		gameoverRender();
+		break;
+	}
+}
+
+void Engine::playingRender() {
+
 	int mapOffsetX = 0, mapOffsetY = 0;
 	if (GUI_ID != -1) {
 		mapOffsetX = UI_list.at(GUI_ID)->mapOffsetX;
@@ -87,13 +109,14 @@ void Engine::render()
 	}*/
 
 	//engineRenderer.renderMapOLD(mapOffsetX, mapOffsetY);
-	engineRenderer.renderMap(mapOffsetX, mapOffsetY, angle, 62, 62);
+	//engineRenderer.renderMap(mapOffsetX, mapOffsetY, angle, 62, 62);
+	engineRenderer.renderMapTesting(mapOffsetX, mapOffsetY, angle, 62, 62);
 
 
 	engineRenderer.renderCompass(angle);
 
-	TCODConsole::root->setCharBackground(32 - mapOffsetX, 32 - mapOffsetY,map->GetTileAt(player->pos.w, player->pos.h, player->pos.d)->bg);
-	TCODConsole::root->setCharForeground(32 - mapOffsetX, 32 - mapOffsetY,TCODColor::gold);
+	TCODConsole::root->setCharBackground(32 - mapOffsetX, 32 - mapOffsetY, map->GetTileAt(player->pos.x, player->pos.y, player->pos.z)->bg);
+	TCODConsole::root->setCharForeground(32 - mapOffsetX, 32 - mapOffsetY, TCODColor::gold);
 	TCODConsole::root->setChar(32 - mapOffsetX, 32 - mapOffsetY, player->c);
 
 	int j = 0;
@@ -121,7 +144,7 @@ void Engine::render()
 
 		char str[6];
 		sprintf_s(str, "%03d -", item.second);
-		
+
 		/*TCODConsole::root->setDefaultBackground(TCODColor::black);
 		TCODConsole::root->setDefaultForeground(TCODColor::white);
 		TCODConsole::root->print(8 + ((i / 5) * 7), 74 + (i % 5), str);*/
@@ -143,7 +166,7 @@ void Engine::render()
 		player->ren->OnRender(player);
 
 	for (auto & e : npcs) {
-		if (e->ren != nullptr) 
+		if (e->ren != nullptr)
 			e->ren->OnRender(e);
 	}
 
@@ -154,15 +177,30 @@ void Engine::render()
 
 }
 
+void Engine::gameoverRender() {
+	TCODConsole::root->print(0, 0, "YOU HAVE FAILED!!!");
+}
+
 void Engine::update()
 {
+	switch (curScene) {
+	case playing:
+		playingUpdate();
+		break;
+	case gameover:
+		gameoverUpdate();
+		break;
+	}
+}
+
+void Engine::playingUpdate() {
 	TCODSystem::checkForEvent(TCOD_EVENT_KEY | TCOD_EVENT_MOUSE, &keyboardInput, &mouseInput);
 
 	if (GUI_ID == -1) { //MAIN UPDATE
 		player->ai->OnTick(player);
-		if(player->ai->hasUpdated){
+		if (player->ai->hasUpdated) {
 			for (auto &e : npcs) {
-				if(e->ai != nullptr){
+				if (e->ai != nullptr) {
 					e->ai->OnTick(e);
 				}
 				if (e->phys != nullptr) {
@@ -203,15 +241,23 @@ void Engine::update()
 			bottomValue = map.GetTileAt(x,y,yPosition)->type;
 		}
 	}*/
+
+	if (player->meta->HP <= 0) {
+		curScene = gameover;
+	}
+}
+
+void Engine::gameoverUpdate() {
+	TCODSystem::checkForEvent(TCOD_EVENT_KEY | TCOD_EVENT_MOUSE, &keyboardInput, &mouseInput);
 }
 
 std::shared_ptr<Entity> Engine::checkEntityAtPos(Map::Pos p) {
 	for (auto &e : npcs) {
-		if (e->pos == p){
+		if (e->pos == p) {
 			return e;
 		}
 	}
-	
+
 	if (player->pos == p)
 		return player;
 
@@ -229,15 +275,15 @@ bool Engine::checkEntityCollisionAtPos(Map::Pos p) {
 void EngineRenderer::renderMapStandard() {
 	for (int j = 0; j < 64; j++) {
 		for (int i = 0; i < 64; i++) {
-			auto layer = engine.map->GetTileAt(engine.player->pos.w + i - 32, engine.player->pos.h + j - 32, engine.player->pos.d);
-			if(layer != nullptr){
+			auto layer = engine.map->GetTileAt(engine.player->pos.x + i - 32, engine.player->pos.y + j - 32, engine.player->pos.z);
+			if (layer != nullptr) {
 				TCODColor col = layer->color;
 				TCODColor bg = layer->bg;
 				char c = layer->c;
 				int temp = 2;
-				if(layer->type == TileManager::tile_empty){
-					for (int h = engine.player->pos.d - 1; h > -1; h--) {
-						layer = engine.map->GetTileAt(engine.player->pos.w + i - 32, engine.player->pos.h + j - 32, h);
+				if (layer->type == TileManager::tile_empty) {
+					for (int y = engine.player->pos.z - 1; y > -1; y--) {
+						layer = engine.map->GetTileAt(engine.player->pos.x + i - 32, engine.player->pos.y + j - 32, y);
 						if (layer != nullptr) {
 							if (layer->type != TileManager::tile_empty) {
 								col = layer->color;
@@ -261,10 +307,10 @@ void EngineRenderer::renderMapStandard() {
 	}
 
 	for (auto & e : engine.npcs) {
-		if (e->pos.d >= engine.player->pos.d) {
+		if (e->pos.z >= engine.player->pos.z) {
 			TCODColor c = e->col;
-			TCODConsole::root->setCharForeground(e->pos.w, e->pos.h, e->col);
-			TCODConsole::root->setChar(e->pos.w, e->pos.h, e->c);
+			TCODConsole::root->setCharForeground(e->pos.x, e->pos.y, e->col);
+			TCODConsole::root->setChar(e->pos.x, e->pos.y, e->c);
 		}
 	}
 }
@@ -276,9 +322,9 @@ void Engine::saveMap(const char * name) {
 	zip.putInt(map->depth);
 	for (int j = 0; j < map->height; j++) {
 		for (int i = 0; i < map->width; i++) {
-			for (int h = 0; h < map->depth; h++) {
-				zip.putInt(map->arr[(i)+((j)*map->width) + ((h)*map->height * map->width)]);
-				zip.putInt(map->groundArr[(i)+((j)*map->width) + ((h)*map->height * map->width)]);
+			for (int y = 0; y < map->depth; y++) {
+				zip.putInt(map->arr[(i)+((j)*map->width) + ((y)*map->height * map->width)]);
+				zip.putInt(map->groundArr[(i)+((j)*map->width) + ((y)*map->height * map->width)]);
 				
 			}
 		}
@@ -297,9 +343,9 @@ void Engine::loadMap(const char * name) {
 		
 		for (int j = 0; j < map->height; j++) {
 			for (int i = 0; i < map->width; i++) {
-				for (int h = 0; h < map->depth; h++) {
-					map->arr[(i)+((j)*map->width) + ((h)*map->height * map->width)] = zip.getInt();
-					map->groundArr[(i)+((j)*map->width) + ((h)*map->height * map->width)] = zip.getInt();
+				for (int y = 0; y < map->depth; y++) {
+					map->arr[(i)+((j)*map->width) + ((y)*map->height * map->width)] = zip.getInt();
+					map->groundArr[(i)+((j)*map->width) + ((y)*map->height * map->width)] = zip.getInt();
 				}
 			}
 		}

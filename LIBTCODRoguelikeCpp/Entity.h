@@ -32,6 +32,15 @@ class WanderingAi : public Ai {
 	int nextPosX, nextPosY;
 };
 
+class EnemyAi : public Ai {
+	void OnTick(std::shared_ptr<Entity> entity) override;
+
+
+	bool hasFoundPlayer = false;
+	bool isFollowing = false;
+	int nextPosX, nextPosY;
+};
+
 class PlayerAi : public Ai {
 public:
 	void OnTick(std::shared_ptr<Entity> entity) override;
