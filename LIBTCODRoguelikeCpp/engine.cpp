@@ -110,7 +110,8 @@ void Engine::playingRender() {
 
 	//engineRenderer.renderMapOLD(mapOffsetX, mapOffsetY);
 	//engineRenderer.renderMap(mapOffsetX, mapOffsetY, angle, 62, 62);
-	engineRenderer.renderMapTesting(mapOffsetX, mapOffsetY, angle, 62, 62);
+	//engineRenderer.renderMapTesting(mapOffsetX, mapOffsetY, angle, 62, 62);
+	engineRenderer.renderFirstPerson(FPSAngle,FPSAngleY);
 
 
 	engineRenderer.renderCompass(angle);

@@ -27,6 +27,129 @@ std::vector<int> Engine::GetAngles(char angle) {
 	return angles;
 }
 
+void EngineRenderer::renderFirstPerson(float angle, float angleY) {
+	for (int j = 0; j <= 62; j++) {
+		for (int i = 0; i <= 62; i++) {
+			float curI = (float)i / 62;
+			float curJ = (float)j / 62;
+
+			float IConst = -((curI * (3.14) / 2) - (3.14 / 4));
+			float JConst = -((curJ * (3.14) / 2) - (3.14 / 4));
+			//std::cout << curI << "\n";
+			float discoloration = 1;
+
+			float totalBlocks = 0;
+
+			float totalHue = 0.0f;
+			float totalSat = 0.0f;
+			float totalVal = 0.0f;
+
+			float totalCharHue = 0.0f;
+			float totalCharSat = 0.0f;
+			float totalCharVal = 0.0f;
+
+			char c = ' ';
+
+
+			for (float f = 0; f < 50; f += 0.5) {
+				discoloration += 0.1f;
+
+				curI = cosf(IConst + angle) * f;
+
+				curJ = sinf(JConst + angleY) * f;
+				Tile * tile = engine.map->GetTileAt(engine.player->pos.x + curI, engine.player->pos.y + f, engine.player->pos.z + curJ);
+
+				//std::cout << "WOOP: " << i << ":" << j << " POOW: " << engine.player->pos.w + curI << ":" << engine.player->pos.d + curJ;
+				if (tile == nullptr) {
+
+					break;
+				}
+
+
+				if (tile->type == tile->wall) {
+
+
+					bool isInShadow = false;
+					for (float f1 = 1; f1 < 20; f1 += 0.5f) {
+						Tile * ti = engine.map->GetTileAt(engine.player->pos.x + curI + (f1/2), engine.player->pos.y + f + (f1/2), (engine.player->pos.z + curJ) + f1);
+							
+						if (ti != nullptr) {
+							if (ti->type == ti->wall) {
+								isInShadow = true;
+								break;
+							}
+						}
+						else {
+							break;
+						}
+					}
+
+					if (isInShadow) {
+						totalBlocks++;
+						totalHue += tile->bg.getHue();
+						totalSat += tile->bg.getSaturation();
+						totalVal += tile->bg.getValue() / 1.5;
+
+						totalCharHue += tile->color.getHue();
+						totalCharSat += tile->color.getSaturation();
+						totalCharVal += tile->color.getValue() / 1.5;
+					}
+					else {
+						totalBlocks++;
+						totalHue += tile->bg.getHue();
+						totalSat += tile->bg.getSaturation();
+						totalVal += tile->bg.getValue();
+
+						totalCharHue += tile->color.getHue();
+						totalCharSat += tile->color.getSaturation();
+						totalCharVal += tile->color.getValue();
+					}
+					
+					c = tile->c;
+					break;
+				}
+				else if (tile->type == tile->liquid) {
+
+					//JConst += 0.04;
+
+					totalBlocks += 3;
+
+					totalHue += tile->bg.getHue() * 3;
+					totalSat += tile->bg.getSaturation() * 3;
+					totalVal += tile->bg.getValue() * 3;
+
+					totalCharHue += tile->color.getHue() * 3;
+					totalCharSat += tile->color.getSaturation() * 3;
+					totalCharVal += tile->color.getValue() * 3;
+					c = tile->c;
+				}
+			}
+			if (totalBlocks == 0) {
+				totalHue = 134 / 255;
+				totalSat = 133 / 255;
+				totalVal = 140 / 255;
+				totalBlocks = 1;
+			}
+			TCODColor bg = TCODColor(totalHue / totalBlocks, totalSat / totalBlocks, totalVal / totalBlocks);
+			TCODColor col = TCODColor(totalCharHue / totalBlocks, totalCharSat / totalBlocks, totalCharSat / totalBlocks);
+
+			bg.setValue(bg.getValue() / discoloration);
+			col.setValue(col.getValue() / discoloration);
+
+			bg.r = (pow(((float)bg.r / 255), (1 / 2.2))) * 255;
+			bg.g = (pow(((float)bg.g / 255), (1 / 2.2))) * 255;
+			bg.b = (pow(((float)bg.b / 255), (1 / 2.2))) * 255;
+
+			col.r = (pow(((float)col.r / 255), (1 / 2.2))) * 255;
+			col.g = (pow(((float)col.g / 255), (1 / 2.2))) * 255;
+			col.b = (pow(((float)col.b / 255), (1 / 2.2))) * 255;
+
+			drawFullCharacter(i, j, c, col, bg);
+		}
+	}
+}
+
+
 void EngineRenderer::renderMapTesting(int mOffX, int mOffY, int angle, int width, int height) {
 	for (int j = 0; j < height; j++) {
 		for (int i = 0; i < width; i++) {

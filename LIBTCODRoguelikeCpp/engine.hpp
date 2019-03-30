@@ -25,9 +25,9 @@ public:
 	void renderMapZoomedOut();
 	void renderMapStandard();
 	void renderMapTesting(int mOffX, int mOffY, int angle, int width = 62, int height = 62);
+	void renderFirstPerson(float angle, float angleY);
 	void renderCompass(char angle);
 	void drawFullCharacter(int x, int y, char c, const TCODColor col, const TCODColor bg);
-
 
 	int layerSize = 20;
 } engineRenderer;
@@ -54,6 +54,8 @@ public:
 
 	std::shared_ptr<Entity> checkEntityAtPos(Map::Pos p);
 	bool checkEntityCollisionAtPos(Map::Pos p);
+	float FPSAngle = 0;
+	float FPSAngleY = 0;
 
 	Map* map;
 

@@ -369,6 +369,18 @@ void PlayerAi::OnTick(std::shared_ptr<Entity> entity)
 		MoveRelative(entity, 0, 0, -1);
 		hasUpdated = true;
 		break;
+	case TCODK_KP4:
+		engine.FPSAngle += 0.1f;
+		break;
+	case TCODK_KP6:
+		engine.FPSAngle -= 0.1f;
+		break;
+	case TCODK_KP8:
+		engine.FPSAngleY -= 0.1f;
+		break;
+	case TCODK_KP2:
+		engine.FPSAngleY += 0.1f;
+		break;
 		/*case TCODK_DELETE:
 			isDigging = !isDigging;
 			break;
