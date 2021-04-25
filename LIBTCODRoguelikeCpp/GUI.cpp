@@ -34,14 +34,14 @@ void AnnouncementsGUI::Update() {
 	int i = 0;
 	for (auto announcement : engine.console) {
 		console.setDefaultForeground(announcement.col);
-		console.print(1, ((i - cursorPos) * 2) + 5, announcement.msg.c_str());
+		console.printf(1, ((i - cursorPos) * 2) + 5, announcement.msg.c_str());
 		i++;
 	}
 
 	console.rect(0, 0, 62, 5, true);
 
 	console.setDefaultForeground(TCODColor::white);
-	console.print(1, 1, "Announcements");
+	console.printf(1, 1, "Announcements");
 
 }
 
@@ -82,17 +82,17 @@ void InventoryGUI::Update() {
 
 	console.setDefaultBackground(TCODColor::black);
 	console.clear();
-	console.print(1, 1, menuName.c_str());
+	console.printf(1, 1, menuName.c_str());
 
 	int i = 0;
 	for (auto item : engine.player->inv->item_vector) {
 		bool isSelected = i == cursorPos;
-		console.print(1 + isSelected, i + 3, itemManager.GetItemData(item.first)->name.c_str());
+		console.printf(1 + isSelected, i + 3, itemManager.GetItemData(item.first)->name.c_str());
 		char num[4];
 		sprintf_s(num, "%03d", item.second);
 
 		if (isSelected)
-			console.print(1, i + 3, ">");
+			console.printf(1, i + 3, ">");
 
 		console.printRectEx(22, i + 3, 3, 1, TCOD_BKGND_DEFAULT, TCOD_RIGHT, num);
 
@@ -100,7 +100,7 @@ void InventoryGUI::Update() {
 	}
 
 	if (invSize == 0) {
-		console.print(1, 3, "Your inventory seems\nto be empty!\nGo grab some loot!");
+		console.printf(1, 3, "Your inventory seems\nto be empty!\nGo grab some loot!");
 	}
 }
 
@@ -209,10 +209,10 @@ void CastingGUI::Update() {
 	if (cursorPos > 3)
 		cursorPos = 3;
 
-	console.print(1, 3, cursorPos == 0 ? ">Cast North" : "Cast North");
-	console.print(1, 4, cursorPos == 1 ? ">Cast South" : "Cast South");
-	console.print(1, 5, cursorPos == 2 ? ">Cast West" : "Cast West");
-	console.print(1, 6, cursorPos == 3 ? ">Cast East" : "Cast East");
+	console.printf(1, 3, cursorPos == 0 ? ">Cast North" : "Cast North");
+	console.printf(1, 4, cursorPos == 1 ? ">Cast South" : "Cast South");
+	console.printf(1, 5, cursorPos == 2 ? ">Cast West" : "Cast West");
+	console.printf(1, 6, cursorPos == 3 ? ">Cast East" : "Cast East");
 }
 
 void CastingGUI::Use(int index) {

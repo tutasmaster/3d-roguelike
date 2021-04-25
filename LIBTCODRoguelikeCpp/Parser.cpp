@@ -33,12 +33,13 @@ void Parser::Run() {
 
 	std::string path = "./Data Files";
 
-	for (const auto & p : std::experimental::filesystem::directory_iterator(path)) {
+
+	/*for (const auto & p : std::filesystem::directory_iterator(path)) {
 		std::string s = "./Data Files/" + p.path().filename().string();
 		if (!s.find(".dat"))
 			return;
 		parser.run(s.c_str(), new ParserListener());
-	}
+	}*/
 }
 
 Parser::~Parser()

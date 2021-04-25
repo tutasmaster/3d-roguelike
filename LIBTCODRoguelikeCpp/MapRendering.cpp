@@ -54,10 +54,15 @@ void EngineRenderer::renderFirstPerson(float angle, float angleY) {
 			for (float f = 0; f < 50; f += 0.5) {
 				discoloration += 0.1f;
 
-				curI = cosf(IConst + angle) * f;
+				/*curI = cosf(IConst + angle);
 
-				curJ = sinf(JConst + angleY) * f;
-				Tile * tile = engine.map->GetTileAt(engine.player->pos.x + curI, engine.player->pos.y + f, engine.player->pos.z + curJ);
+				curJ = sinf(JConst + angleY);*/
+
+				float NEW_Z = 0.5 + (((1-curJ) - 0.5) * f * 2);
+
+				float NEW_X = 0.5 + (cosf(IConst + angle) * f);
+				float NEW_Y = 0.5 + (sinf(IConst + angle) * f);
+				Tile * tile = engine.map->GetTileAt(engine.player->pos.x + NEW_X, engine.player->pos.y + NEW_Y, engine.player->pos.z + NEW_Z);
 
 				//std::cout << "WOOP: " << i << ":" << j << " POOW: " << engine.player->pos.w + curI << ":" << engine.player->pos.d + curJ;
 				if (tile == nullptr) {

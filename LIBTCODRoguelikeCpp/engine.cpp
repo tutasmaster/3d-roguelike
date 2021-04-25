@@ -111,8 +111,15 @@ void Engine::playingRender() {
 	//engineRenderer.renderMapOLD(mapOffsetX, mapOffsetY);
 	//engineRenderer.renderMap(mapOffsetX, mapOffsetY, angle, 62, 62);
 	//engineRenderer.renderMapTesting(mapOffsetX, mapOffsetY, angle, 62, 62);
-	engineRenderer.renderFirstPerson(FPSAngle,FPSAngleY);
+	//engineRenderer.renderFirstPerson(FPSAngle,FPSAngleY);
+	
 
+	if (betterRenderer) {
+		engineRenderer.renderMap(mapOffsetX, mapOffsetY, angle, 62, 62);
+	}
+	else {
+		engineRenderer.renderFirstPerson(FPSAngle, FPSAngleY);
+	}
 
 	engineRenderer.renderCompass(angle);
 
@@ -124,7 +131,7 @@ void Engine::playingRender() {
 	for (int i = console.size() - 1; i > -1; i--) {
 		j++;
 		TCODConsole::root->setDefaultForeground(console.at(i).col);
-		TCODConsole::root->print(1, 64 + j, console.at(i).msg.c_str());
+		TCODConsole::root->printf(1, 64 + j, console.at(i).msg.c_str());
 		if (j > 4)
 			i = -1;
 	}
@@ -137,8 +144,8 @@ void Engine::playingRender() {
 
 	TCODConsole::root->printFrame(0, 71, 64, 9, false);
 
-	TCODConsole::root->print(1, 71, player->name.c_str());
-	TCODConsole::root->print(1, 74, "Head\nTrunk\nArms\nLegs\nFeet");
+	TCODConsole::root->printf(1, 71, player->name.c_str());
+	TCODConsole::root->printf(1, 74, "Head\nTrunk\nArms\nLegs\nFeet");
 
 	int i = 0;
 	for (auto &item : player->inv->item_vector) {
@@ -179,7 +186,7 @@ void Engine::playingRender() {
 }
 
 void Engine::gameoverRender() {
-	TCODConsole::root->print(0, 0, "YOU HAVE FAILED!!!");
+	TCODConsole::root->printf(0, 0, "YOU HAVE FAILED!!!");
 }
 
 void Engine::update()
@@ -334,13 +341,13 @@ void Engine::saveMap(const char * name) {
 }
 
 void Engine::loadMap(const char * name) {
-	TCODZip zip;
+	/*TCODZip zip;
 	if(TCODSystem::fileExists(name)){
 		zip.loadFromFile(name);
 		delete map;
 		map = new Map(zip.getInt(), zip.getInt(), zip.getInt());
 		//map = Map(zip.getInt(), zip.getInt(), zip.getInt());
-		/*zip.getInt(); zip.getInt(); zip.getInt();*/
+		/*zip.getInt(); zip.getInt(); zip.getInt();
 		
 		for (int j = 0; j < map->height; j++) {
 			for (int i = 0; i < map->width; i++) {
@@ -350,5 +357,5 @@ void Engine::loadMap(const char * name) {
 				}
 			}
 		}
-	}
+	}*/
 }

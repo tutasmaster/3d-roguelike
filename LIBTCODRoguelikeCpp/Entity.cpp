@@ -46,7 +46,7 @@ int Metabolism::DoDamage(int ATK) {
 
 
 void WorldBuilderRenderer::OnRender(std::shared_ptr<Entity> entity) {
-	TCODConsole::root->print(0, 0, std::to_string((std::static_pointer_cast<WorldBuilderAi>(entity->ai)->block)).c_str());
+	TCODConsole::root->printf(0, 0, std::to_string((std::static_pointer_cast<WorldBuilderAi>(entity->ai)->block)).c_str());
 }
 
 void BoulderPhysics::ApplyPhysics(std::shared_ptr<Entity> entity) {
