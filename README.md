@@ -20,7 +20,7 @@ An engine test for a potential 3D roguelike project with a unique rendering tech
 ## Requirements
 
  - [SDL](https://www.libsdl.org/)
- - [LIBTCOD (1.5.2)](http://roguecentral.org/doryen/libtcod/)
+ - [LIBTCOD (1.16.7)](https://github.com/libtcod/libtcod)
 
 ## Building
 
