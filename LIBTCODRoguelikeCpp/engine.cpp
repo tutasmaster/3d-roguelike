@@ -114,11 +114,26 @@ void Engine::playingRender() {
 	//engineRenderer.renderFirstPerson(FPSAngle,FPSAngleY);
 	
 
-	if (betterRenderer) {
+	if (renderer == 0) {
 		engineRenderer.renderMap(mapOffsetX, mapOffsetY, angle, 62, 62);
 	}
-	else {
+	else if(renderer == 1){
 		engineRenderer.renderFirstPerson(FPSAngle, FPSAngleY);
+	}
+	else if (renderer == 2) {
+		engineRenderer.renderMapOLD(mapOffsetX, mapOffsetY, angle);
+	}
+	else if (renderer == 3) {
+		engineRenderer.renderMapInverted();
+	}
+	else if (renderer == 4) {
+		engineRenderer.renderMapZoomedOut();
+	}
+	else if (renderer == 5) {
+		engineRenderer.renderMapStandard();
+	}
+	else if (renderer == 6) {
+		engineRenderer.renderMapTesting(mapOffsetX, mapOffsetY, angle, 62, 62);
 	}
 
 	engineRenderer.renderCompass(angle);

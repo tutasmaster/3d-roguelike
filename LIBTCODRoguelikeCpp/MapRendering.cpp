@@ -152,6 +152,7 @@ void EngineRenderer::renderFirstPerson(float angle, float angleY) {
 			drawFullCharacter(i, j, c, col, bg);
 		}
 	}
+	TCODConsole::root->printf(20, 20, "renderMapFirstPerson()");
 }
 
 
@@ -449,6 +450,7 @@ void EngineRenderer::renderMapTesting(int mOffX, int mOffY, int angle, int width
 			}
 		}
 	}
+	TCODConsole::root->printf(20, 20, "renderMapTesting()");
 }
 
 void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int height) {
@@ -730,7 +732,8 @@ void EngineRenderer::renderMap(int mOffX, int mOffY, int angle, int width, int h
 					}
 				}
 			}																				 
-		}	
+		}
+		TCODConsole::root->printf(20, 20, "renderMap()");
 	
 }																						 
 																						 
@@ -997,6 +1000,7 @@ void EngineRenderer::renderMapOLD(int mOffX, int mOffY, int angle) {
 			}
 		}
 	}
+	TCODConsole::root->printf(20, 20, "renderMapOLD(3 overloads)");
 }
 
 /*Probably the 1 file that's actually commented in the entire code*/
@@ -1215,35 +1219,36 @@ void EngineRenderer::renderMapOLD(int mOffX, int mOffY) {
 			}
 		}
 	}
+	TCODConsole::root->printf(20, 20, "renderMapOLD(2 overloads)");
 }
 
 void EngineRenderer::renderMapInverted() {
 
 	/*Let's draw the entire viewable area*/
-	/*
+	
 	for (int j = 0; j < 64; j++) {
 		for (int i = 0; i < 64; i++) {
 
 			//Let's keep this here so that the code get's smaller.
 			//Essentially just getting the position of the player, and drawing everything 32 tiles to the left of him (assuming he is on the center of a screen 64x64).
 			//This will serve to make the rest of the code more readable
-			Map::Pos currentPosition(player->pos.x - i + 32, player->pos.y - j + 32, player->pos.z);
+			Map::Pos currentPosition(engine.player->pos.x - i + 32, engine.player->pos.y - j + 32, engine.player->pos.z);
 
 			//Let's start raycasting down, trying to find the first possible tile we can work with
 			//This keeps how far down we went.
 			int depth = 0;
 
 			//We are going to start on top and slowly go down
-			for (int z = player->pos.z; z > -1; --z) {
+			for (int z = engine.player->pos.z; z > -1; --z) {
 
 				//Let's make sure we are looking at the right tile
 				Map::Pos newPosition(currentPosition.x + depth + 1, currentPosition.y + depth + 1, currentPosition.z - depth);
 
-				if (z >= player->pos.z - 1) {
+				if (z >= engine.player->pos.z - 1) {
 					newPosition = Map::Pos(currentPosition.x, currentPosition.y, currentPosition.z - depth);
 				}
 
-				Tile * currentTile = map->GetTileAt(newPosition);
+				Tile * currentTile = engine.map->GetTileAt(newPosition);
 
 				//Let's skip invalid tiles (they only happen outside of the map so we will skip the rest of the depth search)
 				//Or if we have looked farther than we currently allow by the engine.
@@ -1257,10 +1262,10 @@ void EngineRenderer::renderMapInverted() {
 				}
 
 				//Let's try to fix some edges
-				Tile * blockingTile = map->GetTileAt(newPosition.x - 1, newPosition.y - 1, newPosition.z);
+				Tile * blockingTile = engine.map->GetTileAt(newPosition.x - 1, newPosition.y - 1, newPosition.z);
 
 				//I can only fix edges on the bottom layers
-				if (z < player->pos.z - 1 && depth != 0 && blockingTile != nullptr) {
+				if (z < engine.player->pos.z - 1 && depth != 0 && blockingTile != nullptr) {
 
 					//I give priority to any tile to the bottom and right of the current block
 					if (blockingTile->type == Tile::wall) {
@@ -1268,8 +1273,8 @@ void EngineRenderer::renderMapInverted() {
 					}
 					else {
 						//Then I pick either the one to the right, or bottom. If both are just air, then the tile is clearly visible.
-						Tile * eastTile = map->GetTileAt(newPosition.x - 1, newPosition.y, newPosition.z);
-						Tile * southTile = map->GetTileAt(newPosition.x, newPosition.y - 1, newPosition.z);
+						Tile * eastTile = engine.map->GetTileAt(newPosition.x - 1, newPosition.y, newPosition.z);
+						Tile * southTile = engine.map->GetTileAt(newPosition.x, newPosition.y - 1, newPosition.z);
 						if (eastTile != nullptr && southTile != nullptr) {
 							if (eastTile->type == Tile::wall)
 								currentTile = eastTile;
@@ -1302,9 +1307,9 @@ void EngineRenderer::renderMapInverted() {
 
 					//Continuing the ray downwards
 					//Grabbing all the colors along the way and averaging (probably not the correct way to do it)
-					for (int g = player->pos.z - depth; g > -1; --g) {
+					for (int g = engine.player->pos.z - depth; g > -1; --g) {
 						iter++;
-						Tile * currentTile = map->GetTileAt(newPosition.x + iter, newPosition.y + iter, newPosition.z - iter);
+						Tile * currentTile = engine.map->GetTileAt(newPosition.x + iter, newPosition.y + iter, newPosition.z - iter);
 						if (currentTile != nullptr) {
 							//We get the color of anything except air
 							if (currentTile->type != Tile::empty) {
@@ -1361,36 +1366,37 @@ void EngineRenderer::renderMapInverted() {
 					break;
 			}
 		}
-	}*/
+	}
+	TCODConsole::root->printf(20, 20, "renderMapInverted()");
 }
 
 void EngineRenderer::renderMapZoomedOut() {
 
 	/*Let's draw the entire viewable area*/
-	/*
+	
 	for (int j = 0; j < 64; j ++) {
 		for (int i = 0; i < 64; i++) {
 
 			//Let's keep this here so that the code get's smaller.
 			//Essentially just getting the position of the player, and drawing everything 32 tiles to the left of him (assuming he is on the center of a screen 64x64).
 			//This will serve to make the rest of the code more readable
-			Map::Pos currentPosition(player->pos.x + (i*4) - 128, player->pos.y + (j * 4) - 128, player->pos.z);
+			Map::Pos currentPosition(engine.player->pos.x + (i*4) - 128, engine.player->pos.y + (j * 4) - 128, engine.player->pos.z);
 
 			//Let's start raycasting down, trying to find the first possible tile we can work with
 			//This keeps how far down we went.
 			int depth = 0;
 
 			//We are going to start on top and slowly go down
-			for (int z = player->pos.z; z > -1; --z) {
+			for (int z = engine.player->pos.z; z > -1; --z) {
 
 				//Let's make sure we are looking at the right tile
 				Map::Pos newPosition(currentPosition.x - depth + 1, currentPosition.y - depth + 1, currentPosition.z - depth);
 
-				if (z >= player->pos.z - 1) {
+				if (z >= engine.player->pos.z - 1) {
 					newPosition = Map::Pos(currentPosition.x, currentPosition.y, currentPosition.z - depth);
 				}
 
-				Tile * currentTile = map->GetTileAt(newPosition);
+				Tile * currentTile = engine.map->GetTileAt(newPosition);
 
 				//Let's skip invalid tiles (they only happen outside of the map so we will skip the rest of the depth search)
 				//Or if we have looked farther than we currently allow by the engine.
@@ -1404,10 +1410,10 @@ void EngineRenderer::renderMapZoomedOut() {
 				}
 
 				//Let's try to fix some edges
-				Tile * blockingTile = map->GetTileAt(newPosition.x + 1, newPosition.y + 1, newPosition.z);
+				Tile * blockingTile = engine.map->GetTileAt(newPosition.x + 1, newPosition.y + 1, newPosition.z);
 
 				//I can only fix edges on the bottom layers
-				if (z < player->pos.z - 1 && depth != 0 && blockingTile != nullptr) {
+				if (z < engine.player->pos.z - 1 && depth != 0 && blockingTile != nullptr) {
 
 					//I give priority to any tile to the bottom and right of the current block
 					if (blockingTile->type == Tile::wall) {
@@ -1415,8 +1421,8 @@ void EngineRenderer::renderMapZoomedOut() {
 					}
 					else {
 						//Then I pick either the one to the right, or bottom. If both are just air, then the tile is clearly visible.
-						Tile * eastTile = map->GetTileAt(newPosition.x + 1, newPosition.y, newPosition.z);
-						Tile * southTile = map->GetTileAt(newPosition.x, newPosition.y + 1, newPosition.z);
+						Tile * eastTile = engine.map->GetTileAt(newPosition.x + 1, newPosition.y, newPosition.z);
+						Tile * southTile = engine.map->GetTileAt(newPosition.x, newPosition.y + 1, newPosition.z);
 						if (eastTile != nullptr && southTile != nullptr) {
 							if (eastTile->type == Tile::wall)
 								currentTile = eastTile;
@@ -1449,9 +1455,9 @@ void EngineRenderer::renderMapZoomedOut() {
 
 					//Continuing the ray downwards
 					//Grabbing all the colors along the way and averaging (probably not the correct way to do it)
-					for (int g = player->pos.z - depth; g > -1; --g) {
+					for (int g = engine.player->pos.z - depth; g > -1; --g) {
 						iter++;
-						Tile * currentTile = map->GetTileAt(newPosition.x - iter, newPosition.y - iter, newPosition.z - iter);
+						Tile * currentTile = engine.map->GetTileAt(newPosition.x - iter, newPosition.y - iter, newPosition.z - iter);
 						if (currentTile != nullptr) {
 							//We get the color of anything except air
 							if (currentTile->type != Tile::empty) {
@@ -1508,5 +1514,6 @@ void EngineRenderer::renderMapZoomedOut() {
 					break;
 			}
 		}
-	}*/
+	}
+	TCODConsole::root->printf(20, 20, "renderMapZoomedOut()");
 }

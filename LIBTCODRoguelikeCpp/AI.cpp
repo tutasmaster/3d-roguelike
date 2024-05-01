@@ -405,7 +405,7 @@ void PlayerAi::OnTick(std::shared_ptr<Entity> entity)
 			engine.angle = 0;
 		break;
 	case TCODK_F4:
-		engine.betterRenderer = !engine.betterRenderer;
+		engine.renderer = ++engine.renderer % 7;
 		break;
 	case TCODK_F11:
 		engine.saveMap();

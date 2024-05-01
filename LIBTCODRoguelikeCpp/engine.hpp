@@ -83,7 +83,7 @@ public:
 	void saveMap(const char * name = "default.map");
 	void loadMap(const char * name = "default.map");
 
-	bool betterRenderer = false;
+	int renderer = 0;
 	char angle = 0;
 
 	TCOD_key_t keyboardInput;
